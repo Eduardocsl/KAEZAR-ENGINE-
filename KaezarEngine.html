@@ -1,0 +1,3833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KaezarEngine v2.0 — AI-Powered</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Oxanium:wght@300;400;600;800&display=swap" rel="stylesheet">
+<script src="https://js.puter.com/v2/"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --bg0:#07080f;--bg1:#0c0e1a;--bg2:#111326;--bg3:#181b30;--bg4:#1e2238;
+  --border:#252848;--border2:#353a65;
+  --accent:#00e5ff;--accent2:#7c4dff;--accent3:#ff6b35;--green:#00e676;
+  --red:#ff4081;--yellow:#ffd740;--orange:#ff9800;
+  --text:#dde4ff;--text2:#8892c8;--text3:#454d7a;
+  --panel:260px;--panel-r:290px;--toolbar:42px;--statusbar:26px;
+  --ai-glow:0 0 20px rgba(0,229,255,.25), 0 0 60px rgba(124,77,255,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg0);color:var(--text);font-family:'Space Mono',monospace;font-size:12px;}
+
+/* ── PROVIDER TABS ── */
+.prov-tab{display:flex;align-items:center;gap:5px;padding:5px 8px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'Oxanium',sans-serif;font-size:10px;font-weight:600;transition:all .2s;white-space:nowrap;justify-content:center;}
+.prov-tab:hover{border-color:var(--accent);color:var(--text);}
+.prov-tab.active{border-color:var(--accent);background:rgba(0,229,255,.1);color:var(--accent);}
+.prov-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.saved-prov-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);}
+.saved-prov-row.active-prov{border-color:var(--accent);background:rgba(0,229,255,.05);}
+
+/* ── SCANLINE OVERLAY ── */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:9999;}
+
+/* ── LAYOUT ── */
+#app{display:flex;flex-direction:column;width:100vw;height:100vh;}
+
+/* ── MENUBAR ── */
+#menubar{display:flex;align-items:center;background:var(--bg1);border-bottom:1px solid var(--border);height:38px;padding:0 8px;gap:4px;flex-shrink:0;position:relative;}
+#menubar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);opacity:.4;}
+.logo{font-family:'Oxanium',sans-serif;font-weight:800;font-size:15px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-right:16px;letter-spacing:-1px;}
+.logo span{font-size:9px;background:linear-gradient(135deg,var(--accent3),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-left:4px;vertical-align:super;}
+.menu-btn{padding:4px 10px;border-radius:4px;cursor:pointer;color:var(--text2);transition:all .15s;font-size:11px;}
+.menu-btn:hover{background:var(--bg3);color:var(--text);}
+.menu-sep{width:1px;height:18px;background:var(--border);margin:0 4px;}
+
+/* ── AI BADGE ── */
+.ai-badge{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.ai-indicator{display:flex;align-items:center;gap:6px;padding:4px 12px;background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(124,77,255,.12));border:1px solid rgba(0,229,255,.3);border-radius:20px;cursor:pointer;transition:all .2s;}
+.ai-indicator:hover{border-color:var(--accent);box-shadow:var(--ai-glow);}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.ai-label{font-size:10px;color:var(--accent);font-family:'Oxanium',sans-serif;font-weight:600;letter-spacing:.5px;}
+
+/* ── TOOLBAR ── */
+#toolbar{display:flex;align-items:center;background:var(--bg2);border-bottom:1px solid var(--border);height:var(--toolbar);padding:0 8px;gap:6px;flex-shrink:0;}
+.tool-btn{width:30px;height:30px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;}
+.tool-btn:hover{background:var(--bg4);color:var(--text);border-color:var(--border2);}
+.tool-btn.active{background:linear-gradient(135deg,rgba(0,229,255,.15),rgba(124,77,255,.15));color:var(--accent);border-color:rgba(0,229,255,.4);box-shadow:0 0 8px rgba(0,229,255,.2);}
+.tool-sep{width:1px;height:22px;background:var(--border);margin:0 2px;}
+.mode-badge{padding:3px 10px;border-radius:4px;border:1px solid var(--border2);font-size:9px;font-family:'Oxanium',sans-serif;font-weight:600;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.mode-badge.m2d{background:rgba(0,229,255,.08);color:var(--accent);border-color:rgba(0,229,255,.3);}
+.mode-badge.m3d{background:rgba(124,77,255,.08);color:var(--accent2);border-color:rgba(124,77,255,.3);}
+.play-group{display:flex;gap:4px;margin:0 auto;}
+.play-btn{padding:5px 18px;border-radius:6px;border:none;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;}
+#btn-play{background:linear-gradient(135deg,var(--green),#00c853);color:#001a04;}
+#btn-play:hover{filter:brightness(1.2);box-shadow:0 0 16px rgba(0,230,118,.4);}
+#btn-pause{background:var(--bg4);color:var(--text2);border:1px solid var(--border2);}
+#btn-stop{background:var(--bg4);color:var(--text2);border:1px solid var(--border2);}
+#btn-stop:hover{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 12px rgba(255,64,129,.4);}
+body.playing #canvas-wrap{outline:2px solid var(--green);outline-offset:-2px;}
+
+/* ── WORKSPACE ── */
+#workspace{display:flex;flex:1;overflow:hidden;}
+.panel{background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+.panel.right{border-right:none;border-left:1px solid var(--border);width:var(--panel-r);}
+.panel.left{width:var(--panel);}
+
+/* ── PANEL TABS ── */
+.panel-tab{display:flex;border-bottom:1px solid var(--border);background:var(--bg0);}
+.panel-tab-btn{padding:7px 12px;font-size:9px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.8px;text-transform:uppercase;font-family:'Oxanium',sans-serif;}
+.panel-tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.panel-tab-btn:hover:not(.active){color:var(--text2);}
+.panel-section{padding:6px 0;border-bottom:1px solid var(--border);}
+.panel-section-title{padding:4px 10px;font-size:9px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;font-family:'Oxanium',sans-serif;}
+.icon-btn{cursor:pointer;color:var(--text3);transition:color .15s;font-size:13px;}
+.icon-btn:hover{color:var(--accent);}
+
+/* ── HIERARCHY ── */
+#hierarchy{flex:1;overflow-y:auto;}
+.hier-item{display:flex;align-items:center;padding:4px 8px;cursor:pointer;transition:background .1s;gap:4px;}
+.hier-item:hover{background:var(--bg3);}
+.hier-item.selected{background:linear-gradient(90deg,rgba(0,229,255,.12),transparent);border-left:2px solid var(--accent);color:var(--accent);}
+.hier-item .ei{font-size:11px;}
+.hier-item .ename{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hier-item .evis{color:var(--text3);cursor:pointer;font-size:10px;}
+.hier-item .e3d{font-size:8px;color:var(--accent2);background:rgba(124,77,255,.15);padding:1px 4px;border-radius:3px;}
+
+/* ── INSPECTOR ── */
+#inspector{flex:1;overflow-y:auto;}
+.comp-block{border-bottom:1px solid var(--border);}
+.comp-header{display:flex;align-items:center;padding:7px 10px;cursor:pointer;gap:6px;background:var(--bg2);}
+.comp-header:hover{background:var(--bg3);}
+.comp-title{flex:1;font-size:11px;font-weight:700;color:var(--text);font-family:'Oxanium',sans-serif;}
+.comp-body{padding:6px 10px;display:flex;flex-direction:column;gap:5px;}
+.prop-row{display:flex;align-items:center;gap:6px;}
+.prop-label{width:72px;color:var(--text2);font-size:10px;flex-shrink:0;}
+.prop-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:3px 6px;color:var(--text);font-family:inherit;font-size:11px;outline:none;}
+.prop-input:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(0,229,255,.2);}
+.prop-color{width:28px;height:20px;border-radius:3px;border:1px solid var(--border2);cursor:pointer;padding:0;}
+.prop-check{accent-color:var(--accent);}
+.prop-select{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:3px 6px;color:var(--text);font-family:inherit;font-size:11px;outline:none;}
+.xyz-row{display:flex;gap:4px;flex:1;}
+.xyz-field{flex:1;display:flex;align-items:center;gap:2px;}
+.xyz-label{font-size:9px;font-weight:700;width:10px;}
+.xyz-label.x{color:#f87171;}.xyz-label.y{color:#4ade80;}.xyz-label.z{color:#60a5fa;}
+.xyz-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:2px 4px;color:var(--text);font-family:inherit;font-size:10px;outline:none;width:100%;}
+.xyz-input:focus{border-color:var(--accent);}
+.add-comp-btn{margin:8px 10px;padding:5px;border-radius:4px;border:1px dashed var(--border2);background:transparent;color:var(--text3);font-family:inherit;font-size:10px;cursor:pointer;width:calc(100% - 20px);transition:all .15s;}
+.add-comp-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── VIEWPORT ── */
+#viewport-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg0);}
+#viewport-tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);}
+.vp-tab{padding:6px 16px;font-size:10px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.5px;transition:all .15s;font-family:'Oxanium',sans-serif;font-weight:600;}
+.vp-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+#canvas-wrap{flex:1;position:relative;overflow:hidden;}
+#gameCanvas{display:block;width:100%;height:100%;cursor:crosshair;}
+#threeCanvas{display:none;width:100%;height:100%;cursor:crosshair;}
+#canvas-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;}
+.vp-info{position:absolute;top:8px;left:8px;background:rgba(7,8,15,.85);border:1px solid var(--border2);border-radius:4px;padding:4px 10px;font-size:10px;color:var(--text2);}
+.vp-info span{color:var(--accent);}
+.vp-mode-label{position:absolute;top:8px;right:8px;font-family:'Oxanium',sans-serif;font-size:9px;font-weight:800;letter-spacing:2px;padding:3px 10px;border-radius:4px;}
+.vp-mode-label.label2d{background:rgba(0,229,255,.1);color:var(--accent);border:1px solid rgba(0,229,255,.3);}
+.vp-mode-label.label3d{background:rgba(124,77,255,.1);color:var(--accent2);border:1px solid rgba(124,77,255,.3);}
+
+/* ── AI AGENT PANEL ── */
+#ai-panel{position:absolute;bottom:0;left:0;right:0;height:200px;background:var(--bg1);border-top:1px solid rgba(0,229,255,.3);display:flex;flex-direction:column;z-index:150;box-shadow:0 -4px 40px rgba(0,229,255,.08);}
+#ai-panel.hidden{display:none;}
+.ai-panel-header{display:flex;align-items:center;gap:8px;padding:6px 12px;background:linear-gradient(135deg,rgba(0,229,255,.05),rgba(124,77,255,.05));border-bottom:1px solid var(--border);}
+.ai-panel-title{font-family:'Oxanium',sans-serif;font-weight:700;font-size:12px;color:var(--accent);letter-spacing:.5px;flex:1;}
+.ai-close{cursor:pointer;color:var(--text3);transition:color .15s;font-size:14px;}
+.ai-close:hover{color:var(--red);}
+#ai-messages{flex:1;overflow-y:auto;padding:8px 12px;display:flex;flex-direction:column;gap:6px;}
+.ai-msg{display:flex;gap:8px;align-items:flex-start;}
+.ai-msg .avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.ai-msg.user .avatar{background:rgba(124,77,255,.2);border:1px solid rgba(124,77,255,.4);}
+.ai-msg.ai .avatar{background:rgba(0,229,255,.15);border:1px solid rgba(0,229,255,.4);}
+.ai-msg .bubble{flex:1;font-size:11px;color:var(--text2);line-height:1.5;}
+.ai-msg.ai .bubble{color:var(--text);}
+.ai-msg .bubble code{background:var(--bg3);color:var(--accent3);padding:1px 5px;border-radius:3px;font-size:10px;}
+.ai-input-row{display:flex;gap:6px;padding:8px 12px;border-top:1px solid var(--border);position:relative;z-index:160;}
+#ai-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 12px;color:var(--text);font-family:inherit;font-size:11px;outline:none;transition:all .2s;position:relative;z-index:161;}
+#ai-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,229,255,.12);}
+#ai-send{padding:6px 16px;background:linear-gradient(135deg,var(--accent2),rgba(0,229,255,.8));color:#fff;border:none;border-radius:6px;font-family:'Oxanium',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;position:relative;z-index:161;}
+#ai-send:hover{filter:brightness(1.15);box-shadow:0 0 16px rgba(124,77,255,.5);}
+#ai-send:disabled{opacity:.5;cursor:not-allowed;}
+.ai-typing{display:flex;gap:3px;align-items:center;padding:4px 0;}
+.ai-typing span{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:typing .9s infinite;}
+.ai-typing span:nth-child(2){animation-delay:.15s;background:var(--accent2);}
+.ai-typing span:nth-child(3){animation-delay:.3s;background:var(--accent3);}
+@keyframes typing{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-4px);}}
+
+/* ── APPLY CODE BUTTON ── */
+.apply-code-btn{display:inline-block;margin-top:4px;padding:3px 10px;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);border-radius:4px;color:var(--green);font-size:10px;cursor:pointer;transition:all .2s;}
+.apply-code-btn:hover{background:rgba(0,230,118,.2);box-shadow:0 0 8px rgba(0,230,118,.3);}
+
+/* ── BOTTOM PANEL ── */
+#bottom-panel{height:150px;border-top:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;background:var(--bg1);}
+#bottom-tabs{display:flex;background:var(--bg0);border-bottom:1px solid var(--border);}
+.btm-tab{padding:6px 16px;font-size:9px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:'Oxanium',sans-serif;font-weight:700;letter-spacing:.5px;}
+.btm-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+#console-panel,#assets-panel,#script-panel{flex:1;overflow:auto;display:none;}
+#console-panel.active,#assets-panel.active,#script-panel.active{display:flex;flex-direction:column;}
+.console-line{padding:2px 10px;font-size:10px;border-bottom:1px solid rgba(255,255,255,.02);display:flex;gap:8px;align-items:flex-start;}
+.console-line.log{color:var(--text2);}
+.console-line.warn{color:var(--yellow);}
+.console-line.error{color:var(--red);}
+.console-line.info{color:var(--accent);}
+.console-time{color:var(--text3);flex-shrink:0;}
+#script-editor{flex:1;background:var(--bg0);color:var(--text);font-family:'Space Mono',monospace;font-size:11px;border:none;outline:none;padding:8px 12px;resize:none;line-height:1.7;}
+#assets-panel{padding:8px;flex-direction:row;flex-wrap:wrap;gap:8px;align-content:flex-start;}
+.asset-item{width:60px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px;border-radius:4px;border:1px solid transparent;}
+.asset-item:hover{background:var(--bg3);border-color:var(--border2);}
+.asset-icon{font-size:24px;}
+.asset-name{font-size:9px;color:var(--text2);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;}
+
+/* ── STATUS BAR ── */
+#statusbar{height:var(--statusbar);background:linear-gradient(90deg,var(--accent2),var(--accent));display:flex;align-items:center;padding:0 12px;gap:16px;flex-shrink:0;}
+.status-item{font-size:10px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:4px;font-family:'Oxanium',sans-serif;font-weight:600;}
+.status-item b{color:#fff;}
+
+/* ── DROPDOWNS ── */
+.dropdown{position:relative;}
+.dropdown-menu{position:absolute;top:100%;left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;min-width:170px;z-index:1000;display:none;box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 20px rgba(0,229,255,.06);}
+.dropdown-menu.open{display:block;}
+.dd-item{padding:7px 14px;cursor:pointer;color:var(--text2);font-size:11px;display:flex;align-items:center;gap:8px;transition:all .1s;}
+.dd-item:hover{background:var(--bg3);color:var(--text);}
+.dd-sep{height:1px;background:var(--border);margin:3px 0;}
+.dd-item .shortcut{margin-left:auto;color:var(--text3);font-size:10px;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:20px;width:min(420px,94vw);box-sizing:border-box;box-shadow:0 24px 80px rgba(0,0,0,.7),var(--ai-glow);}
+.modal h2{font-family:'Oxanium',sans-serif;font-weight:800;font-size:18px;margin-bottom:18px;color:var(--text);}
+.modal-row{margin-bottom:12px;}
+.modal-row label{display:block;font-size:10px;color:var(--text2);margin-bottom:4px;font-family:'Oxanium',sans-serif;letter-spacing:.5px;}
+.modal-row input,.modal-row select,.modal-row textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:7px 10px;color:var(--text);font-family:inherit;font-size:12px;outline:none;}
+.modal-row input:focus,.modal-row select:focus,.modal-row textarea:focus{border-color:var(--accent);}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;}
+.modal-btns button{padding:8px 20px;border-radius:6px;border:none;font-family:'Oxanium',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-cancel{background:var(--bg4);color:var(--text2);}
+.btn-cancel:hover{background:var(--border2);}
+.btn-ok{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;}
+.btn-ok:hover{filter:brightness(1.1);}
+
+/* ── RESIZE HANDLES ── */
+.resize-h{width:4px;cursor:col-resize;background:transparent;flex-shrink:0;transition:background .15s;}
+.resize-h:hover{background:var(--accent);}
+.resize-v{height:4px;cursor:row-resize;background:transparent;flex-shrink:0;transition:background .15s;}
+.resize-v:hover{background:var(--accent);}
+
+/* ── CTX MENU ── */
+#ctx-menu{position:fixed;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;min-width:180px;z-index:3000;display:none;box-shadow:0 8px 32px rgba(0,0,0,.6);}
+.ctx-item{padding:7px 14px;cursor:pointer;color:var(--text2);font-size:11px;transition:all .1s;}
+.ctx-item:hover{background:var(--bg3);color:var(--text);}
+.ctx-sep{height:1px;background:var(--border);margin:3px 0;}
+
+/* ── SCROLLBARS ── */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text3);}
+
+/* ── TOOLTIP ── */
+[data-tip]{position:relative;}
+[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--bg0);border:1px solid var(--border2);border-radius:4px;padding:3px 8px;font-size:10px;white-space:nowrap;color:var(--text);pointer-events:none;z-index:100;}
+
+/* ── 3D PANEL EXTRAS ── */
+.comp-3d-badge{font-size:8px;color:var(--accent2);background:rgba(124,77,255,.15);padding:1px 5px;border-radius:3px;margin-left:4px;}
+.project-file{display:flex;align-items:center;gap:6px;padding:5px 10px;cursor:pointer;border-radius:4px;transition:background .1s;}
+.project-file:hover{background:var(--bg3);}
+.project-file-icon{font-size:14px;}
+.project-file-name{font-size:11px;color:var(--text2);}
+
+/* ════════════════════════════════════════════════════
+   MOBILE OVERRIDES — KaezarEngine v2 Mobile
+   ════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── Reset panels width ── */
+  :root {
+    --panel: 100vw;
+    --panel-r: 100vw;
+  }
+
+  /* ── MENUBAR: compact ── */
+  #menubar { padding: 0 6px; gap: 0; overflow: hidden; height: 44px; }
+  .logo { font-size: 13px; margin-right: 6px; flex-shrink: 0; }
+  .logo span { display: none; }
+  /* Hide desktop menu buttons, show hamburger */
+  .menu-btn, .menu-sep { display: none; }
+  #mobile-hamburger { display: flex; }
+  /* AI badge compact */
+  .ai-badge { gap: 4px; }
+  .ai-label { display: none; }
+  .ai-indicator { padding: 4px 8px; }
+
+  /* ── TOOLBAR: horizontal scroll ── */
+  #toolbar {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 5px;
+    padding: 0 6px;
+    height: 48px;
+    flex-wrap: nowrap;
+  }
+  #toolbar::-webkit-scrollbar { display: none; }
+  .tool-btn { width: 36px; height: 36px; flex-shrink: 0; font-size: 16px; }
+  .play-btn { padding: 6px 12px; font-size: 10px; flex-shrink: 0; }
+  .play-group { margin: 0; gap: 4px; }
+  .mode-badge { flex-shrink: 0; }
+
+  /* ── WORKSPACE: stack panels as drawers, viewport fills ── */
+  #workspace { position: relative; overflow: hidden; }
+
+  /* Left and right panels become full-height drawers */
+  .panel.left {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 280px !important;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform .28s cubic-bezier(.4,0,.2,1);
+    box-shadow: 4px 0 32px rgba(0,0,0,.7);
+    height: 100%;
+  }
+  .panel.left.mob-open { transform: translateX(0); }
+
+  .panel.right {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 290px !important;
+    z-index: 200;
+    transform: translateX(100%);
+    transition: transform .28s cubic-bezier(.4,0,.2,1);
+    box-shadow: -4px 0 32px rgba(0,0,0,.7);
+    height: 100%;
+  }
+  .panel.right.mob-open { transform: translateX(0); }
+
+  /* Viewport takes full width */
+  #viewport-wrap { width: 100% !important; flex: 1; }
+
+  /* Resize handles hidden on mobile */
+  .resize-h, .resize-v { display: none; }
+
+  /* ── MOBILE PANEL NAV BAR ── */
+  #mob-panel-nav {
+    display: flex;
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 8px;
+    z-index: 300;
+    background: rgba(7,8,15,.85);
+    border: 1px solid var(--border2);
+    border-radius: 24px;
+    padding: 6px 10px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 24px rgba(0,0,0,.6), 0 0 12px rgba(0,229,255,.08);
+  }
+  .mob-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 10px;
+    border-radius: 14px;
+    cursor: pointer;
+    color: var(--text3);
+    font-size: 18px;
+    transition: all .2s;
+    min-width: 44px;
+  }
+  .mob-nav-btn span { font-size: 8px; font-family: 'Oxanium',sans-serif; font-weight: 700; letter-spacing: .5px; }
+  .mob-nav-btn.active { background: rgba(0,229,255,.12); color: var(--accent); }
+  .mob-nav-btn:active { transform: scale(.9); }
+
+  /* ── DRAWER OVERLAY ── */
+  #mob-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 199;
+    backdrop-filter: blur(2px);
+  }
+  #mob-overlay.show { display: block; }
+
+  /* ── BOTTOM PANEL: pull tab ── */
+  #bottom-panel {
+    height: 48px;
+    transition: height .3s cubic-bezier(.4,0,.2,1);
+    overflow: hidden;
+  }
+  #bottom-panel.mob-expanded { height: 220px; }
+  #bottom-tabs { position: relative; }
+  #mob-pull-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 0;
+    cursor: pointer;
+    color: var(--text3);
+    background: var(--bg0);
+    border-top: 1px solid var(--border);
+  }
+  #mob-pull-tab::before {
+    content: '';
+    width: 36px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border2);
+  }
+
+  /* ── STATUS BAR: compact ── */
+  #statusbar { gap: 8px; padding: 0 8px; overflow: hidden; }
+  .status-item { font-size: 9px; white-space: nowrap; }
+  #statusbar .status-item:nth-child(3),
+  #statusbar .status-item:nth-child(4) { display: none; }
+
+  /* ── MODALS: full-width ── */
+  .modal { min-width: unset; width: calc(100vw - 32px); max-width: 420px; padding: 16px; }
+  .modal h2 { font-size: 15px; margin-bottom: 12px; }
+  #script-modal .modal { min-width: unset; width: calc(100vw - 32px); }
+
+  /* ── AI PANEL ── */
+  #ai-panel { height: 300px; }
+  /* When AI panel open, nav hides itself via JS class */
+  #mob-panel-nav.ai-open { display: none !important; }
+  #ai-panel .ai-input-row { padding: 10px 12px 14px; }
+  #ai-input { font-size: 14px; padding: 9px 12px; min-height: 42px; }
+  #ai-send { font-size: 12px; padding: 9px 16px; min-height: 42px; }
+  #ai-panel .ai-panel-title { font-size: 11px; }
+  /* Nav z-index must be below AI panel */
+  #mob-panel-nav { z-index: 140; }
+
+  /* ── INSPECTOR: bigger touch targets ── */
+  .prop-input, .xyz-input, .prop-select { font-size: 13px; padding: 5px 8px; min-height: 36px; }
+  .prop-color { width: 36px; height: 30px; }
+  .prop-label { font-size: 11px; }
+  .comp-header { padding: 10px 12px; }
+  .hier-item { padding: 8px 10px; min-height: 40px; }
+  .panel-tab-btn { padding: 10px 14px; }
+  .dd-item { padding: 10px 16px; font-size: 13px; }
+  .add-comp-btn { padding: 10px; font-size: 12px; }
+  .apply-code-btn { padding: 8px 14px; font-size: 12px; }
+
+  /* ── VIEWPORT TABS ── */
+  .vp-tab { padding: 8px 14px; font-size: 11px; }
+
+  /* ── MOBILE HAMBURGER MENU ── */
+  #mob-hamburger-menu {
+    display: none;
+    position: fixed;
+    top: 44px;
+    left: 0;
+    width: min(320px, 90vw);
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-top: none;
+    border-radius: 0 0 10px 0;
+    z-index: 2000;
+    box-shadow: 8px 8px 32px rgba(0,0,0,.7);
+    max-height: calc(100vh - 44px);
+    overflow-y: auto;
+  }
+  #mob-hamburger-menu.open { display: block; }
+  .mob-menu-section { border-bottom: 1px solid var(--border); }
+  .mob-menu-section-title { padding: 8px 14px; font-size: 9px; font-weight: 700; color: var(--text3); letter-spacing: 1px; font-family: 'Oxanium',sans-serif; text-transform: uppercase; }
+  .mob-menu-item { padding: 11px 16px; font-size: 13px; color: var(--text2); cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,.03); }
+  .mob-menu-item:active { background: var(--bg3); }
+
+  /* ── TOUCH HINTS ── */
+  .touch-hint {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,.7);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 10px;
+    color: var(--text3);
+    white-space: nowrap;
+    pointer-events: none;
+    animation: fadeHint 3s forwards;
+    z-index: 150;
+  }
+  @keyframes fadeHint { 0%{opacity:1;} 70%{opacity:1;} 100%{opacity:0;} }
+}
+
+/* Hamburger btn always hidden on desktop */
+#mobile-hamburger { display: none; }
+#mob-panel-nav { display: none; }
+#mob-overlay { display: none; }
+#mob-pull-tab { display: none; }
+#mob-hamburger-menu { display: none; }
+@media (min-width: 769px) {
+  #mob-pull-tab { display: none !important; }
+  #mob-panel-nav { display: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- MENUBAR -->
+<div id="menubar">
+  <div class="logo">⬡ KaezarEngine<span>v2.0</span></div>
+
+  <!-- Mobile hamburger -->
+  <button id="mobile-hamburger" class="tool-btn" onclick="toggleMobMenu()" style="flex-shrink:0;margin-right:4px;" title="Menu">☰</button>
+
+  <div class="dropdown" id="dd-file">
+    <div class="menu-btn" onclick="toggleDD('dd-file')">Arquivo</div>
+    <div class="dropdown-menu" id="dd-file-menu">
+      <div class="dd-item" onclick="newScene()">📄 Nova Cena <span class="shortcut">Ctrl+N</span></div>
+      <div class="dd-item" onclick="saveScene()">💾 Salvar Cena <span class="shortcut">Ctrl+S</span></div>
+      <div class="dd-item" onclick="loadScene()">📂 Carregar Cena</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item" onclick="exportGame()">📦 Exportar Jogo</div>
+    </div>
+  </div>
+  <div class="dropdown" id="dd-edit">
+    <div class="menu-btn" onclick="toggleDD('dd-edit')">Editar</div>
+    <div class="dropdown-menu" id="dd-edit-menu">
+      <div class="dd-item" onclick="undoAction()">↩ Desfazer <span class="shortcut">Ctrl+Z</span></div>
+      <div class="dd-item" onclick="redoAction()">↪ Refazer <span class="shortcut">Ctrl+Y</span></div>
+      <div class="dd-sep"></div>
+      <div class="dd-item" onclick="duplicateSelected()">⧉ Duplicar <span class="shortcut">Ctrl+D</span></div>
+      <div class="dd-item" onclick="deleteSelected()">🗑 Deletar <span class="shortcut">Del</span></div>
+    </div>
+  </div>
+  <div class="dropdown" id="dd-obj">
+    <div class="menu-btn" onclick="toggleDD('dd-obj')">Objeto</div>
+    <div class="dropdown-menu" id="dd-obj-menu">
+      <div style="padding:4px 14px;font-size:9px;color:var(--accent);font-family:'Oxanium',sans-serif;letter-spacing:1px;">── 2D ──</div>
+      <div class="dd-item" onclick="createEntity2D('Rect')">□ Retângulo 2D</div>
+      <div class="dd-item" onclick="createEntity2D('Circle')">○ Círculo 2D</div>
+      <div class="dd-item" onclick="createEntity2D('Text')">T Texto 2D</div>
+      <div class="dd-item" onclick="createEntity2D('Sprite')">🖼 Sprite 2D</div>
+      <div class="dd-item" onclick="createEntity2D('Light')">💡 Luz 2D</div>
+      <div class="dd-item" onclick="createEntity2D('Camera')">🎥 Câmera 2D</div>
+      <div class="dd-sep"></div>
+      <div style="padding:4px 14px;font-size:9px;color:var(--accent2);font-family:'Oxanium',sans-serif;letter-spacing:1px;">── 3D ──</div>
+      <div class="dd-item" onclick="createEntity3D('Box')">📦 Cubo 3D</div>
+      <div class="dd-item" onclick="createEntity3D('Sphere')">🔵 Esfera 3D</div>
+      <div class="dd-item" onclick="createEntity3D('Cylinder')">🪣 Cilindro 3D</div>
+      <div class="dd-item" onclick="createEntity3D('Plane')">▭ Plano 3D</div>
+      <div class="dd-item" onclick="createEntity3D('PointLight3D')">💡 Luz 3D</div>
+      <div class="dd-item" onclick="createEntity3D('Camera3D')">🎥 Câmera 3D</div>
+    </div>
+  </div>
+  <div class="dropdown" id="dd-comp">
+    <div class="menu-btn" onclick="toggleDD('dd-comp')">Componente</div>
+    <div class="dropdown-menu" id="dd-comp-menu">
+      <div class="dd-item" onclick="addComponentToSelected('Rigidbody2D')">⚡ Rigidbody 2D</div>
+      <div class="dd-item" onclick="addComponentToSelected('Collider2D')">⬜ Collider 2D</div>
+      <div class="dd-item" onclick="addComponentToSelected('Script')">📜 Script</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item" onclick="addComponentToSelected('Rigidbody3D')">⚡ Rigidbody 3D</div>
+      <div class="dd-item" onclick="addComponentToSelected('MeshRenderer')">🎨 Mesh Renderer</div>
+    </div>
+  </div>
+  <div class="dropdown" id="dd-view">
+    <div class="menu-btn" onclick="toggleDD('dd-view')">View</div>
+    <div class="dropdown-menu" id="dd-view-menu">
+      <div class="dd-item" onclick="toggleGrid()"># Grid</div>
+      <div class="dd-item" onclick="toggleGizmos()">⊕ Gizmos</div>
+      <div class="dd-item" onclick="resetCamera()">🎯 Reset Câmera</div>
+    </div>
+  </div>
+
+  <div class="ai-badge">
+    <div class="ai-indicator" onclick="toggleAIPanel()" data-tip="Agente IA — Gerar código por intenção">
+      <div class="ai-dot"></div>
+      <div class="ai-label">⚡ AI AGENT</div>
+    </div>
+    <button class="tool-btn" data-tip="Configurar API Key" onclick="openModal('api-modal')" style="margin-left:4px;">🔑</button>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div id="toolbar">
+  <button class="tool-btn active" id="tool-select" data-tip="Selecionar (Q)" onclick="setTool('select')">↖</button>
+  <button class="tool-btn" id="tool-move" data-tip="Mover (W)" onclick="setTool('move')">✥</button>
+  <button class="tool-btn" id="tool-rotate" data-tip="Rotacionar (E)" onclick="setTool('rotate')">↻</button>
+  <button class="tool-btn" id="tool-scale" data-tip="Escalar (R)" onclick="setTool('scale')">⤢</button>
+  <div class="tool-sep"></div>
+  <div class="mode-badge m2d" id="mode-2d-btn" onclick="setEngineMode('2d')" data-tip="Modo 2D">2D</div>
+  <div class="mode-badge m3d" id="mode-3d-btn" onclick="setEngineMode('3d')" data-tip="Modo 3D" style="opacity:.5;">3D</div>
+  <div class="tool-sep"></div>
+  <button class="tool-btn" id="btn-snap" data-tip="Snap to Grid" onclick="toggleSnap()">⊞</button>
+  <button class="tool-btn" data-tip="Pivot/Centro" onclick="togglePivot()">⊕</button>
+
+  <div class="play-group">
+    <button class="play-btn" id="btn-play" onclick="playScene()">▶ Play</button>
+    <button class="play-btn" id="btn-pause" onclick="pauseScene()">⏸ Pause</button>
+    <button class="play-btn" id="btn-stop" onclick="stopScene()">■ Stop</button>
+  </div>
+
+  <button class="tool-btn" data-tip="Configurações" onclick="openModal('settings-modal')">⚙</button>
+  <button class="tool-btn" data-tip="Agente IA" onclick="toggleAIPanel()" style="color:var(--accent);">🤖</button>
+</div>
+
+<!-- WORKSPACE -->
+<div id="workspace">
+
+  <!-- MOBILE DRAWER OVERLAY -->
+  <div id="mob-overlay" onclick="closeMobDrawers()"></div>
+
+  <!-- LEFT PANEL -->
+  <div class="panel left" id="left-panel">
+    <div class="panel-tab">
+      <div class="panel-tab-btn active" onclick="switchLeftTab(this,'hierarchy-tab')">Hierarquia</div>
+      <div class="panel-tab-btn" onclick="switchLeftTab(this,'project-tab')">Projeto</div>
+    </div>
+
+    <div id="hierarchy-tab" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="panel-section">
+        <div class="panel-section-title">
+          Cena Atual
+          <span class="icon-btn" onclick="openNewEntityModal()" title="Novo Objeto">＋</span>
+        </div>
+      </div>
+      <div id="hierarchy" style="flex:1;overflow-y:auto;"></div>
+      <div style="padding:8px 10px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);">
+        Objetos: <span id="obj-count" style="color:var(--accent2);">0</span>
+      </div>
+    </div>
+
+    <div id="project-tab" style="display:none;flex:1;overflow-y:auto;padding:8px;">
+      <div class="project-file"><span class="project-file-icon">📁</span><span class="project-file-name">Cenas</span></div>
+      <div class="project-file"><span class="project-file-icon">📁</span><span class="project-file-name">Scripts</span></div>
+      <div class="project-file"><span class="project-file-icon">📁</span><span class="project-file-name">Assets 3D</span></div>
+      <div class="project-file"><span class="project-file-icon">📁</span><span class="project-file-name">Materiais</span></div>
+      <div class="project-file"><span class="project-file-icon">📁</span><span class="project-file-name">Sons</span></div>
+    </div>
+  </div>
+
+  <div class="resize-h" onmousedown="startResize(event,'left-panel','rh-left','left')"></div>
+
+  <!-- VIEWPORT -->
+  <div id="viewport-wrap">
+    <div id="viewport-tabs">
+      <div class="vp-tab active" onclick="switchVPTab(this,'scene')">Cena</div>
+      <div class="vp-tab" onclick="switchVPTab(this,'game')">Game</div>
+      <div class="vp-tab" onclick="switchVPTab(this,'3d')">3D Preview</div>
+    </div>
+    <div id="canvas-wrap">
+      <!-- 2D Canvas -->
+      <canvas id="gameCanvas"></canvas>
+      <!-- 3D Canvas via Three.js -->
+      <canvas id="threeCanvas"></canvas>
+      <div id="canvas-overlay">
+        <div class="vp-info">
+          FPS: <span id="fps-counter">60</span> · Pos: <span id="mouse-world">0, 0</span>
+        </div>
+        <div class="vp-mode-label label2d" id="mode-label">2D</div>
+      </div>
+      <!-- AI PANEL overlaid inside viewport -->
+      <div id="ai-panel" class="hidden">
+        <div class="ai-panel-header">
+          <span style="font-size:16px;">🤖</span>
+          <div class="ai-panel-title">AI Code Agent — Descreva o que quer criar</div>
+          <span class="ai-close" onclick="toggleAIPanel()">✕</span>
+        </div>
+        <div id="ai-messages"></div>
+        <div class="ai-input-row">
+          <input id="ai-input" placeholder='Ex: "Crie um player que pula com espaço"' onkeydown="if(event.key==='Enter'&&!event.shiftKey)sendAIMessage()">
+          <button id="ai-send" onclick="sendAIMessage()">⚡ Gerar</button>
+        </div>
+      </div>
+
+      <!-- MOBILE PANEL NAV -->
+      <div id="mob-panel-nav">
+        <div class="mob-nav-btn" id="mob-nav-hier" onclick="mobTogglePanel('left')" title="Hierarquia">
+          📋<span>Hierarquia</span>
+        </div>
+        <div class="mob-nav-btn" id="mob-nav-vp" onclick="mobFocusViewport()" title="Viewport">
+          🎮<span>Viewport</span>
+        </div>
+        <div class="mob-nav-btn" id="mob-nav-insp" onclick="mobTogglePanel('right')" title="Inspector">
+          🔧<span>Inspector</span>
+        </div>
+        <div class="mob-nav-btn" id="mob-nav-ai" onclick="toggleAIPanel()" title="AI Agent">
+          🤖<span>AI Agent</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="resize-h" onmousedown="startResize(event,'right-panel','rh-right','right')"></div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel right" id="right-panel">
+    <div class="panel-tab">
+      <div class="panel-tab-btn active" onclick="switchRightTab(this,'inspector-tab')">Inspector</div>
+      <div class="panel-tab-btn" onclick="switchRightTab(this,'layers-tab')">Layers</div>
+    </div>
+    <div id="inspector-tab" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+      <div id="inspector-empty" style="padding:20px 10px;text-align:center;color:var(--text3);font-size:10px;line-height:2;">
+        Nenhum objeto selecionado.<br>Clique na hierarquia ou no viewport.
+      </div>
+      <div id="inspector" style="flex:1;overflow-y:auto;display:none;"></div>
+    </div>
+    <div id="layers-tab" style="display:none;padding:10px;">
+      <div style="font-size:10px;color:var(--text3);">Background · Default · UI · Foreground</div>
+    </div>
+  </div>
+</div>
+
+<!-- RESIZE VERTICAL -->
+<div class="resize-v" onmousedown="startResizeV(event)"></div>
+
+<!-- MOBILE PULL TAB -->
+<div id="mob-pull-tab" onclick="toggleBottomPanel()"></div>
+
+<!-- BOTTOM PANEL -->
+<div id="bottom-panel">
+  <div id="bottom-tabs">
+    <div class="btm-tab active" onclick="switchBtmTab(this,'console-panel')">Console</div>
+    <div class="btm-tab" onclick="switchBtmTab(this,'script-panel')">Script</div>
+    <div class="btm-tab" onclick="switchBtmTab(this,'assets-panel')">Assets</div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 10px;">
+      <span style="font-size:10px;color:var(--text3);">Script ativo:</span>
+      <span id="script-entity-name" style="font-size:10px;color:var(--accent);">—</span>
+      <button style="padding:2px 8px;background:var(--bg4);border:1px solid var(--border2);border-radius:3px;color:var(--text2);font-family:inherit;font-size:9px;cursor:pointer;" onclick="saveScript()">💾 Salvar</button>
+      <button style="padding:2px 8px;background:transparent;border:1px solid var(--border2);border-radius:3px;color:var(--text3);font-family:inherit;font-size:9px;cursor:pointer;" onclick="clearConsole()">🗑 Limpar</button>
+    </div>
+  </div>
+  <div id="console-panel" class="active">
+    <div id="console-lines" style="flex:1;overflow-y:auto;"></div>
+  </div>
+  <div id="script-panel">
+    <textarea id="script-editor" spellcheck="false" placeholder="// Selecione um objeto e clique em 'Editar Script'&#10;// Funções disponíveis: Start(), Update(dt)&#10;// Ex: this.components.transform.x += 100 * dt;"></textarea>
+  </div>
+  <div id="assets-panel">
+    <div class="asset-item"><div class="asset-icon">📦</div><div class="asset-name">Cubo</div></div>
+    <div class="asset-item"><div class="asset-icon">🔵</div><div class="asset-name">Esfera</div></div>
+    <div class="asset-item"><div class="asset-icon">🖼</div><div class="asset-name">Sprite</div></div>
+    <div class="asset-item"><div class="asset-icon">🎵</div><div class="asset-name">Áudio</div></div>
+    <div class="asset-item"><div class="asset-icon">📜</div><div class="asset-name">Script</div></div>
+    <div class="asset-item"><div class="asset-icon">🗺</div><div class="asset-name">Tilemap</div></div>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <div class="status-item">⬡ <b>KaezarEngine v2.0</b></div>
+  <div class="status-item">Cena: <b id="scene-name-status">Nova Cena</b></div>
+  <div class="status-item" id="play-status">■ <b>Parado</b></div>
+  <div class="status-item">Modo: <b id="engine-mode-status">2D</b></div>
+  <div style="margin-left:auto;" class="status-item">AI: <b id="ai-status" style="color:var(--green);">✓ Pronto</b></div>
+  <div class="status-item">Snap: <b id="snap-status">OFF</b></div>
+</div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div id="ctx-menu">
+  <div class="ctx-item" onclick="createEntity2D('Rect'); hideCtx()">□ Criar Rect 2D</div>
+  <div class="ctx-item" onclick="createEntity2D('Circle'); hideCtx()">○ Criar Círculo 2D</div>
+  <div class="ctx-item" onclick="createEntity3D('Box'); hideCtx()">📦 Criar Cubo 3D</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="duplicateSelected(); hideCtx()">⧉ Duplicar</div>
+  <div class="ctx-item" onclick="deleteSelected(); hideCtx()">🗑 Deletar</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="resetCamera(); hideCtx()">🎯 Reset Câmera</div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="new-entity-modal">
+  <div class="modal">
+    <h2>Novo Objeto</h2>
+    <div class="modal-row">
+      <label>NOME</label>
+      <input type="text" id="new-entity-name" value="Objeto">
+    </div>
+    <div class="modal-row">
+      <label>TIPO</label>
+      <select id="new-entity-type">
+        <optgroup label="── 2D ──">
+          <option value="Rect">Retângulo 2D</option>
+          <option value="Circle">Círculo 2D</option>
+          <option value="Text">Texto 2D</option>
+          <option value="Sprite">Sprite 2D</option>
+          <option value="Camera">Câmera 2D</option>
+          <option value="Light">Luz 2D</option>
+        </optgroup>
+        <optgroup label="── 3D ──">
+          <option value="Box">Cubo 3D</option>
+          <option value="Sphere">Esfera 3D</option>
+          <option value="Cylinder">Cilindro 3D</option>
+          <option value="Plane">Plano 3D</option>
+          <option value="Camera3D">Câmera 3D</option>
+          <option value="PointLight3D">Luz 3D</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('new-entity-modal')">Cancelar</button>
+      <button class="btn-ok" onclick="confirmCreateEntity()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="api-modal">
+  <div class="modal" style="width:min(520px,96vw);max-height:90vh;overflow-y:auto;box-sizing:border-box;">
+    <h2>🔑 Configurar AI Providers</h2>
+
+    <!-- Provider tabs — wrap no mobile -->
+    <div id="provider-tabs" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px;">
+      <button class="prov-tab" data-prov="puter" onclick="switchProvider('puter',this)" style="border-color:rgba(168,85,247,.5);grid-column:span 2;">
+        <span class="prov-dot" style="background:#a855f7;"></span> ⚡ Puter.js (Grátis)
+      </button>
+      <button class="prov-tab active" data-prov="anthropic" onclick="switchProvider('anthropic',this)">
+        <span class="prov-dot" style="background:#cc785c;"></span> Anthropic
+      </button>
+      <button class="prov-tab" data-prov="openrouter" onclick="switchProvider('openrouter',this)" style="border-color:rgba(167,139,250,.4);">
+        <span class="prov-dot" style="background:#a78bfa;"></span> OpenRouter ✅
+      </button>
+      <button class="prov-tab" data-prov="openai" onclick="switchProvider('openai',this)">
+        <span class="prov-dot" style="background:#10a37f;"></span> OpenAI
+      </button>
+      <button class="prov-tab" data-prov="google" onclick="switchProvider('google',this)">
+        <span class="prov-dot" style="background:#4285f4;"></span> Google
+      </button>
+      <button class="prov-tab" data-prov="groq" onclick="switchProvider('groq',this)">
+        <span class="prov-dot" style="background:#f55036;"></span> Groq
+      </button>
+      <button class="prov-tab" data-prov="mistral" onclick="switchProvider('mistral',this)">
+        <span class="prov-dot" style="background:#ff7000;"></span> Mistral
+      </button>
+      <button class="prov-tab" data-prov="deepseek" onclick="switchProvider('deepseek',this)">
+        <span class="prov-dot" style="background:#4d9fff;"></span> DeepSeek
+      </button>
+      <button class="prov-tab" data-prov="qwen" onclick="switchProvider('qwen',this)">
+        <span class="prov-dot" style="background:#7b61ff;"></span> Qwen
+      </button>
+    </div>
+
+    <!-- Agent info badge -->
+    <div id="agent-badge" style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;margin-bottom:14px;">
+      <div id="agent-logo" style="font-size:22px;">🤖</div>
+      <div>
+        <div id="agent-name" style="font-family:'Oxanium',sans-serif;font-weight:700;font-size:13px;color:var(--accent);">Anthropic Claude</div>
+        <div id="agent-desc" style="font-size:10px;color:var(--text3);margin-top:2px;">console.anthropic.com · Prefixo: sk-ant-</div>
+      </div>
+      <div id="agent-status-dot" style="margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--text3);box-shadow:none;transition:all .3s;"></div>
+    </div>
+
+    <!-- Key input -->
+    <div class="modal-row">
+      <label id="key-label">API KEY</label>
+      <div style="display:flex;gap:6px;flex:1;">
+        <input type="password" id="api-key-input" placeholder="sk-ant-..." style="flex:1;" oninput="onKeyInput(this.value)">
+        <button onclick="toggleKeyVis()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer;padding:0 8px;font-size:13px;" title="Mostrar/ocultar">👁</button>
+      </div>
+    </div>
+    <div id="key-hint" style="font-size:10px;color:var(--text3);margin-top:-6px;margin-bottom:12px;line-height:1.7;">
+      A chave é salva apenas no navegador (localStorage).
+    </div>
+
+    <!-- Puter login row (visível só quando puter está selecionado) -->
+    <div id="puter-login-row" style="display:none;flex-direction:column;gap:8px;margin-bottom:14px;padding:12px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.3);border-radius:8px;">
+      <div id="puter-login-status" style="font-size:11px;color:var(--text2);text-align:center;">
+        Verificando login Puter...
+      </div>
+      <button onclick="puterDoLogin()" id="puter-login-btn"
+        style="padding:10px;background:linear-gradient(135deg,#a855f7,#7c3aed);color:white;border:none;border-radius:8px;font-family:'Oxanium',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+        ⚡ Entrar com Puter (grátis)
+      </button>
+    </div>
+
+    <!-- Model select -->
+    <div class="modal-row">
+      <label>MODELO</label>
+      <select id="ai-model-select" style="flex:1;"></select>
+    </div>
+
+    <!-- Saved providers list -->
+    <div style="margin-top:14px;">
+      <div style="font-size:9px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-family:'Oxanium',sans-serif;margin-bottom:6px;">PROVIDERS SALVOS</div>
+      <div id="saved-providers-list" style="display:flex;flex-direction:column;gap:4px;max-height:110px;overflow-y:auto;"></div>
+    </div>
+
+    <!-- Proxy status -->
+    <div id="proxy-status-section" style="margin-top:10px;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <span style="font-size:10px;color:var(--text3);">CORS / PROXY</span>
+        <span id="proxy-status-badge" style="font-size:10px;flex:1;text-align:center;">verificando...</span>
+        <button onclick="_checkProxy()" style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer;padding:2px 8px;font-size:10px;font-family:inherit;" title="Recheck">↺</button>
+      </div>
+      <div id="proxy-url-row" style="display:none;margin-top:8px;display:flex;gap:6px;align-items:center;">
+        <input id="proxy-url-input" placeholder="http://localhost:3131 ou https://meu-proxy.render.com"
+          style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:3px 6px;color:var(--text2);font-family:inherit;font-size:10px;outline:none;"
+          value="">
+        <button onclick="saveProxyUrl()" style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--accent);cursor:pointer;padding:3px 10px;font-size:10px;font-family:inherit;">Salvar</button>
+      </div>
+    </div>
+
+    <div class="modal-btns" style="margin-top:14px;">
+      <button class="btn-cancel" onclick="closeModal('api-modal')">Fechar</button>
+      <button style="padding:6px 14px;border-radius:6px;border:1px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-family:inherit;font-size:11px;" onclick="clearCurrentKey()">🗑 Limpar</button>
+      <button class="btn-ok" onclick="saveAPIKey()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <h2>⚙ Configurações</h2>
+    <div class="modal-row">
+      <label>RESOLUÇÃO DO JOGO</label>
+      <select id="cfg-res">
+        <option>1920 × 1080</option>
+        <option selected>1280 × 720</option>
+        <option>854 × 480</option>
+        <option>640 × 360</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <label>FPS ALVO</label>
+      <select id="cfg-fps">
+        <option>30</option>
+        <option selected>60</option>
+        <option>120</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <label>TAMANHO DA GRID</label>
+      <input type="number" id="cfg-grid" value="32" min="8" max="128">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('settings-modal')">Fechar</button>
+      <button class="btn-ok" onclick="applySettings()">Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="script-modal">
+  <div class="modal" style="min-width:520px;">
+    <h2>📜 Editor de Script</h2>
+    <div class="modal-row">
+      <label>OBJETO: <span id="script-modal-entity" style="color:var(--accent);"></span></label>
+      <textarea id="script-modal-editor" style="height:220px;font-family:'Space Mono',monospace;font-size:11px;line-height:1.7;" spellcheck="false"></textarea>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-bottom:8px;">
+      Funções: <code style="color:var(--accent3)">Start()</code>, <code style="color:var(--accent3)">Update(dt)</code> · Acesse: <code style="color:var(--accent3)">this.components.transform</code>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('script-modal')">Cancelar</button>
+      <button class="btn-ok" onclick="saveScriptModal()">💾 Salvar Script</button>
+    </div>
+  </div>
+</div><!-- end #app -->
+
+<!-- MOBILE HAMBURGER MENU (outside #app for z-index) -->
+<div id="mob-hamburger-menu">
+  <div class="mob-menu-section">
+    <div class="mob-menu-section-title">Arquivo</div>
+    <div class="mob-menu-item" onclick="newScene();closeMobMenu()">📄 Nova Cena</div>
+    <div class="mob-menu-item" onclick="saveScene();closeMobMenu()">💾 Salvar Cena</div>
+    <div class="mob-menu-item" onclick="loadScene();closeMobMenu()">📂 Carregar Cena</div>
+    <div class="mob-menu-item" onclick="exportGame();closeMobMenu()">📦 Exportar Jogo</div>
+  </div>
+  <div class="mob-menu-section">
+    <div class="mob-menu-section-title">Editar</div>
+    <div class="mob-menu-item" onclick="undoAction();closeMobMenu()">↩ Desfazer</div>
+    <div class="mob-menu-item" onclick="redoAction();closeMobMenu()">↪ Refazer</div>
+    <div class="mob-menu-item" onclick="duplicateSelected();closeMobMenu()">⧉ Duplicar Selecionado</div>
+    <div class="mob-menu-item" onclick="deleteSelected();closeMobMenu()">🗑 Deletar Selecionado</div>
+  </div>
+  <div class="mob-menu-section">
+    <div class="mob-menu-section-title">Criar Objeto 2D</div>
+    <div class="mob-menu-item" onclick="createEntity2D('Rect');closeMobMenu()">□ Retângulo 2D</div>
+    <div class="mob-menu-item" onclick="createEntity2D('Circle');closeMobMenu()">○ Círculo 2D</div>
+    <div class="mob-menu-item" onclick="createEntity2D('Text');closeMobMenu()">T Texto 2D</div>
+    <div class="mob-menu-item" onclick="createEntity2D('Sprite');closeMobMenu()">🖼 Sprite 2D</div>
+    <div class="mob-menu-item" onclick="createEntity2D('Light');closeMobMenu()">💡 Luz 2D</div>
+    <div class="mob-menu-item" onclick="createEntity2D('Camera');closeMobMenu()">🎥 Câmera 2D</div>
+  </div>
+  <div class="mob-menu-section">
+    <div class="mob-menu-section-title">Criar Objeto 3D</div>
+    <div class="mob-menu-item" onclick="createEntity3D('Box');closeMobMenu()">📦 Cubo 3D</div>
+    <div class="mob-menu-item" onclick="createEntity3D('Sphere');closeMobMenu()">🔵 Esfera 3D</div>
+    <div class="mob-menu-item" onclick="createEntity3D('Cylinder');closeMobMenu()">🔷 Cilindro 3D</div>
+    <div class="mob-menu-item" onclick="createEntity3D('Plane');closeMobMenu()">▭ Plano 3D</div>
+    <div class="mob-menu-item" onclick="createEntity3D('PointLight3D');closeMobMenu()">💡 Luz 3D</div>
+  </div>
+  <div class="mob-menu-section">
+    <div class="mob-menu-section-title">Componentes</div>
+    <div class="mob-menu-item" onclick="addComponentToSelected('Rigidbody2D');closeMobMenu()">⚡ Rigidbody 2D</div>
+    <div class="mob-menu-item" onclick="addComponentToSelected('Collider2D');closeMobMenu()">⬜ Collider 2D</div>
+    <div class="mob-menu-item" onclick="addComponentToSelected('Script');closeMobMenu()">📜 Script</div>
+  </div>
+  <div class="mob-menu-section">
+    <div class="mob-menu-section-title">View & Engine</div>
+    <div class="mob-menu-item" onclick="toggleGrid();closeMobMenu()"># Alternar Grid</div>
+    <div class="mob-menu-item" onclick="toggleGizmos();closeMobMenu()">⊕ Alternar Gizmos</div>
+    <div class="mob-menu-item" onclick="resetCamera();closeMobMenu()">🎯 Reset Câmera</div>
+    <div class="mob-menu-item" onclick="setEngineMode('2d');closeMobMenu()">📐 Modo 2D</div>
+    <div class="mob-menu-item" onclick="setEngineMode('3d');closeMobMenu()">📦 Modo 3D</div>
+    <div class="mob-menu-item" onclick="openModal('settings-modal');closeMobMenu()">⚙ Configurações</div>
+    <div class="mob-menu-item" onclick="openModal('api-modal');closeMobMenu()">🔑 API Key (AI Agent)</div>
+  </div>
+  <div class="mob-menu-section" style="border-top:2px solid rgba(255,107,53,.4);">
+    <div class="mob-menu-section-title" style="color:var(--accent3);letter-spacing:1.5px;">🐛 DEBUG ENGINE</div>
+    <div class="mob-menu-item" onclick="openDebugEngine();closeMobMenu()" style="color:var(--accent3);font-weight:700;">
+      🔬 Abrir Debug Agent
+    </div>
+    <div class="mob-menu-item" onclick="dbgCaptureAndSend('auto');closeMobMenu()" style="color:var(--yellow);">
+      ⚡ Analisar Erros Agora
+    </div>
+    <div class="mob-menu-item" onclick="dbgClearHistory();closeMobMenu()" style="color:var(--text3);">
+      🗑 Limpar Histórico Debug
+    </div>
+  </div>
+</div>
+
+<!-- DEBUG ENGINE MODAL -->
+<div class="modal-overlay" id="debug-modal" style="z-index:3000;align-items:flex-end;">
+  <div class="modal" style="min-width:unset;width:100%;max-width:100%;margin:0;border-radius:16px 16px 0 0;padding:0;max-height:92vh;display:flex;flex-direction:column;">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:linear-gradient(135deg,rgba(255,107,53,.12),rgba(255,215,64,.06));border-bottom:1px solid rgba(255,107,53,.3);flex-shrink:0;">
+      <span style="font-size:20px;">🔬</span>
+      <div style="flex:1;">
+        <div style="font-family:'Oxanium',sans-serif;font-weight:800;font-size:14px;color:var(--accent3);letter-spacing:.5px;">DEBUG ENGINE</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px;">Agente IA analisa e corrige a arquitetura do app</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <div id="dbg-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text3);"></div>
+        <span id="dbg-status-label" style="font-size:10px;color:var(--text3);font-family:'Oxanium',sans-serif;">Pronto</span>
+      </div>
+      <span onclick="closeModal('debug-modal')" style="cursor:pointer;color:var(--text3);font-size:18px;padding:4px 8px;">✕</span>
+    </div>
+
+    <!-- Error summary bar -->
+    <div id="dbg-error-bar" style="padding:8px 16px;background:rgba(255,64,129,.06);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;">
+      <span style="font-size:11px;color:var(--text3);">Erros capturados:</span>
+      <span id="dbg-error-count" style="font-size:13px;font-weight:700;color:var(--red);font-family:'Oxanium',sans-serif;">0</span>
+      <span style="font-size:11px;color:var(--text3);margin-left:8px;">Avisos:</span>
+      <span id="dbg-warn-count" style="font-size:13px;font-weight:700;color:var(--yellow);font-family:'Oxanium',sans-serif;">0</span>
+      <button onclick="dbgCaptureAndSend('auto')" style="margin-left:auto;padding:4px 12px;background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.4);border-radius:6px;color:var(--accent3);font-family:'Oxanium',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">⚡ ANALISAR</button>
+      <button onclick="dbgExportHTML()" title="Exportar HTML com patches aplicados" style="padding:4px 12px;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.35);border-radius:6px;color:var(--accent);font-family:'Oxanium',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">💾 Exportar HTML</button>
+      <button onclick="openModal('github-publish-modal')" title="Publicar direto no GitHub Pages" style="padding:4px 12px;background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.35);border-radius:6px;color:var(--green);font-family:'Oxanium',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">🐙 Publicar</button>
+    </div>
+
+    <!-- Chat messages -->
+    <div id="dbg-messages" style="flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-height:120px;"></div>
+
+    <!-- Pending patch area (hidden until patch arrives) -->
+    <div id="dbg-patch-area" style="display:none;padding:10px 14px;background:rgba(0,230,118,.04);border-top:1px solid rgba(0,230,118,.2);flex-shrink:0;">
+      <div style="font-size:10px;color:var(--green);font-family:'Oxanium',sans-serif;font-weight:700;margin-bottom:6px;">📦 PATCH PRONTO — Mudanças na arquitetura detectadas</div>
+      <div id="dbg-patch-summary" style="font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.6;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="dbgApplyPatch()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--green),#00c853);color:#001a04;border:none;border-radius:8px;font-family:'Oxanium',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">✅ APLICAR PATCH</button>
+        <button onclick="dbgDismissPatch()" style="padding:10px 16px;background:var(--bg4);border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-family:'Oxanium',sans-serif;font-size:11px;cursor:pointer;">✕ Descartar</button>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div style="display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg1);">
+      <input id="dbg-input" placeholder='Ex: "o pan 2D está errático" ou "o 3D não rotaciona com touch"'
+        style="flex:1;background:var(--bg3);border:1px solid rgba(255,107,53,.3);border-radius:8px;padding:10px 14px;color:var(--text);font-family:inherit;font-size:13px;outline:none;"
+        onfocus="this.style.borderColor='var(--accent3)'" onblur="this.style.borderColor='rgba(255,107,53,.3)'"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){dbgSend();event.preventDefault();}">
+      <button id="dbg-send-btn" onclick="dbgSend()" style="padding:10px 16px;background:linear-gradient(135deg,var(--accent3),var(--yellow));color:#1a0a00;border:none;border-radius:8px;font-family:'Oxanium',sans-serif;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">🐛 Debugar</button>
+    </div>
+  </div>
+</div>
+
+<!-- GITHUB PUBLISH MODAL -->
+<div class="modal-overlay" id="github-publish-modal" style="z-index:4000;">
+  <div class="modal" style="max-width:420px;width:96vw;">
+    <h2 style="color:var(--green);font-size:15px;margin-bottom:14px;">🐙 Publicar no GitHub Pages</h2>
+
+    <div style="font-size:10px;color:var(--text3);margin-bottom:14px;line-height:1.7;">
+      Sobe o HTML atual direto para o seu repositório.<br>
+      GitHub Pages atualiza em ~1 minuto automaticamente.
+    </div>
+
+    <div class="modal-row" style="margin-bottom:8px;">
+      <label style="font-size:10px;min-width:90px;">TOKEN</label>
+      <div style="display:flex;gap:6px;flex:1;">
+        <input type="password" id="gh-token-input" placeholder="ghp_xxxxxxxxxxxx"
+          style="flex:1;font-size:11px;" />
+        <button onclick="toggleGhTokenVis()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer;padding:0 8px;font-size:13px;">👁</button>
+      </div>
+    </div>
+    <div style="font-size:9px;color:var(--text3);margin-bottom:10px;line-height:1.6;">
+      github.com → Settings → Developer settings → Personal access tokens → Fine-grained → permissão <b>Contents: Read & Write</b>
+    </div>
+
+    <div class="modal-row" style="margin-bottom:8px;">
+      <label style="font-size:10px;min-width:90px;">USUÁRIO</label>
+      <input id="gh-user-input" placeholder="Eduardocsl" style="flex:1;font-size:11px;" />
+    </div>
+
+    <div class="modal-row" style="margin-bottom:8px;">
+      <label style="font-size:10px;min-width:90px;">REPOSITÓRIO</label>
+      <input id="gh-repo-input" placeholder="KAEZAR-ENGINE-" style="flex:1;font-size:11px;" />
+    </div>
+
+    <div class="modal-row" style="margin-bottom:8px;">
+      <label style="font-size:10px;min-width:90px;">BRANCH</label>
+      <input id="gh-branch-input" placeholder="principal" style="flex:1;font-size:11px;" value="principal" />
+    </div>
+
+    <div class="modal-row" style="margin-bottom:14px;">
+      <label style="font-size:10px;min-width:90px;">ARQUIVO</label>
+      <input id="gh-file-input" placeholder="KaezarEngine_v3-5-10.html" style="flex:1;font-size:11px;" value="KaezarEngine_v3-5-10.html" />
+    </div>
+
+    <div id="gh-publish-status" style="display:none;padding:8px 12px;border-radius:6px;font-size:11px;margin-bottom:12px;line-height:1.6;"></div>
+
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('github-publish-modal')">Fechar</button>
+      <button onclick="ghSaveConfig()" style="padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit;font-size:11px;">💾 Salvar config</button>
+      <button class="btn-ok" style="background:linear-gradient(135deg,#238636,#2ea043);border-color:#238636;" onclick="ghPublish()">🐙 Publicar agora</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESTART CONFIRM MODAL -->
+<div class="modal-overlay" id="restart-modal" style="z-index:4000;">
+  <div class="modal" style="max-width:360px;text-align:center;">
+    <div style="font-size:36px;margin-bottom:12px;">🔄</div>
+    <h2 style="font-size:16px;margin-bottom:8px;">Reiniciar para aplicar?</h2>
+    <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:20px;">
+      O patch foi salvo. Para que as alterações na arquitetura entrem em vigor, o app precisa ser recarregado.
+      <br><br>
+      <span style="color:var(--green);font-size:11px;">✅ Mudanças já salvas em localStorage</span>
+    </p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="dbgRestartNow()" style="flex:1;padding:12px;background:linear-gradient(135deg,var(--accent3),var(--yellow));color:#1a0a00;border:none;border-radius:8px;font-family:'Oxanium',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 Reiniciar Agora</button>
+      <button onclick="closeModal('restart-modal')" style="flex:1;padding:12px;background:var(--bg4);border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-family:'Oxanium',sans-serif;font-size:12px;cursor:pointer;">⏳ Depois</button>
+    </div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  KAEZARENGINE v2.0 — CORE + AI AGENT + 2D/3D
+// ═══════════════════════════════════════════════════════════════
+
+// ── PROXY CONFIG (declarado antes de AI_PROVIDERS para evitar TDZ) ──
+let PROXY_URL = localStorage.getItem('kaezar_proxy_url') || 'http://localhost:3131';
+let _proxyOnline = false;
+
+// ── MULTI-PROVIDER CONFIG ──
+const AI_PROVIDERS = {
+  puter: {
+    name: 'Puter.js',
+    logo: '⚡',
+    desc: 'js.puter.com · Sem API key · CORS nativo ✅ · 500+ modelos grátis',
+    placeholder: '(sem chave necessária)',
+    color: '#a855f7',
+    cors: true,
+    models: [
+      { id:'deepseek/deepseek-v3.2',          label:'DeepSeek V3.2 🆓 (Código)' },
+      { id:'deepseek/deepseek-r1',            label:'DeepSeek R1 🆓 (Raciocínio)' },
+      { id:'deepseek/deepseek-v3.2-speciale', label:'DeepSeek V3.2 Speciale 🆓' },
+      { id:'qwen/qwen3-235b-a22b',            label:'Qwen3 235B 🆓' },
+      { id:'qwen/qwen3-32b',                  label:'Qwen3 32B 🆓' },
+      { id:'meta-llama/llama-4-maverick',     label:'LLaMA 4 Maverick 🆓' },
+      { id:'google/gemma-3-27b-it',           label:'Gemma 3 27B 🆓' },
+      { id:'claude-sonnet-4-5',               label:'Claude Sonnet 4.5' },
+      { id:'gpt-4o',                          label:'GPT-4o' },
+      { id:'gemini-2.5-flash',                label:'Gemini 2.5 Flash' },
+    ],
+    detect: k => false,
+    call: _callPuter,
+  },
+  anthropic: {
+    name: 'Anthropic Claude',
+    logo: '🟠',
+    desc: 'console.anthropic.com · Prefixo: sk-ant-',
+    placeholder: 'sk-ant-...',
+    color: '#cc785c',
+    cors: true, // CORS nativo — funciona no mobile sem proxy
+    models: [
+      { id:'claude-sonnet-4-20250514', label:'Claude Sonnet 4 (Recomendado)' },
+      { id:'claude-opus-4-20250514',   label:'Claude Opus 4 (Mais potente)' },
+      { id:'claude-haiku-4-5-20251001',label:'Claude Haiku 4.5 (Mais rápido)' },
+    ],
+    detect: k => k.startsWith('sk-ant-'),
+    call: _callAnthropic,
+  },
+  openrouter: {
+    name: 'OpenRouter',
+    logo: '🔀',
+    desc: 'openrouter.ai · Prefixo: sk-or- · CORS nativo ✅',
+    placeholder: 'sk-or-v1-...',
+    color: '#a78bfa',
+    cors: true, // tem CORS nativo — funciona no mobile sem proxy
+    models: [
+      { id:'openrouter/free',                      label:'🎲 Auto Free (Melhor disponível)' },
+      { id:'deepseek/deepseek-chat-v3-5:free',     label:'DeepSeek V3.5 🆓 (Grátis)' },
+      { id:'deepseek/deepseek-r1:free',            label:'DeepSeek R1 🆓 (Grátis)' },
+      { id:'qwen/qwen3-235b-a22b:free',            label:'Qwen3 235B 🆓 (Grátis)' },
+      { id:'qwen/qwen3-32b:free',                  label:'Qwen3 32B 🆓 (Grátis)' },
+      { id:'meta-llama/llama-4-maverick:free',     label:'LLaMA 4 Maverick 🆓 (Grátis)' },
+      { id:'google/gemma-3-27b-it:free',           label:'Gemma 3 27B 🆓 (Grátis)' },
+      { id:'google/gemma-3-12b-it:free',           label:'Gemma 3 12B 🆓 (Grátis)' },
+      { id:'nvidia/llama-3.1-nemotron-ultra-253b-v1:free', label:'NVIDIA Nemotron 253B 🆓 (Grátis)' },
+      { id:'mistralai/devstral-small:free',        label:'Devstral Small 🆓 (Grátis)' },
+      { id:'deepseek/deepseek-chat-v3-5',          label:'DeepSeek V3.5 (Pago)' },
+      { id:'openai/gpt-4o',                        label:'GPT-4o (Pago)' },
+      { id:'anthropic/claude-sonnet-4-5',          label:'Claude Sonnet 4.5 (Pago)' },
+    ],
+    detect: k => k.startsWith('sk-or-'),
+    call: _callOpenRouter,
+  },
+  openai: {
+    name: 'OpenAI GPT',
+    logo: '🟢',
+    desc: 'platform.openai.com · Prefixo: sk- · requer proxy',
+    placeholder: 'sk-...',
+    color: '#10a37f',
+    cors: false,
+    models: [
+      { id:'gpt-4o',       label:'GPT-4o (Recomendado)' },
+      { id:'gpt-4o-mini',  label:'GPT-4o Mini (Rápido)' },
+      { id:'gpt-4-turbo',  label:'GPT-4 Turbo' },
+      { id:'o3-mini',      label:'o3-mini (Raciocínio)' },
+    ],
+    detect: k => k.startsWith('sk-') && !k.startsWith('sk-ant-') && !k.startsWith('sk-or-') && k.length > 20,
+    call: _callOpenAI,
+  },
+  google: {
+    name: 'Google Gemini',
+    logo: '🔵',
+    desc: 'aistudio.google.com · Prefixo: AIza · CORS nativo ✅',
+    placeholder: 'AIza...',
+    color: '#4285f4',
+    cors: true,
+    models: [
+      { id:'gemini-2.0-flash',             label:'Gemini 2.0 Flash (Rápido)' },
+      { id:'gemini-2.5-pro-preview-03-25', label:'Gemini 2.5 Pro (Mais potente)' },
+      { id:'gemini-1.5-flash',             label:'Gemini 1.5 Flash' },
+    ],
+    detect: k => k.startsWith('AIza'),
+    call: _callGemini,
+  },
+  groq: {
+    name: 'Groq',
+    logo: '🔴',
+    desc: 'console.groq.com · Prefixo: gsk_ · requer proxy',
+    placeholder: 'gsk_...',
+    color: '#f55036',
+    cors: false,
+    models: [
+      { id:'llama-3.3-70b-versatile', label:'LLaMA 3.3 70B (Recomendado)' },
+      { id:'llama-3.1-8b-instant',    label:'LLaMA 3.1 8B (Ultra rápido)' },
+      { id:'mixtral-8x7b-32768',      label:'Mixtral 8x7B' },
+      { id:'gemma2-9b-it',            label:'Gemma2 9B' },
+    ],
+    detect: k => k.startsWith('gsk_'),
+    call: _callGroq,
+  },
+  mistral: {
+    name: 'Mistral AI',
+    logo: '🟡',
+    desc: 'console.mistral.ai · requer proxy',
+    placeholder: 'chave Mistral...',
+    color: '#ff7000',
+    cors: false,
+    models: [
+      { id:'mistral-large-latest',  label:'Mistral Large (Recomendado)' },
+      { id:'mistral-small-latest',  label:'Mistral Small (Rápido)' },
+      { id:'codestral-latest',      label:'Codestral (Código)' },
+    ],
+    detect: k => k.length > 20 && !k.startsWith('sk-') && !k.startsWith('AIza') && !k.startsWith('gsk_') && !/^[a-zA-Z0-9]{32,}$/.test(k),
+    call: _callMistral,
+  },
+  deepseek: {
+    name: 'DeepSeek',
+    logo: '🐋',
+    desc: 'platform.deepseek.com · requer proxy',
+    placeholder: 'sk-...',
+    color: '#4d9fff',
+    cors: false,
+    models: [
+      { id:'deepseek-chat',            label:'DeepSeek V3 (Recomendado para código)' },
+      { id:'deepseek-reasoner',        label:'DeepSeek R1 (Raciocínio avançado)' },
+      { id:'deepseek-chat-v3-5',       label:'DeepSeek V3.5 (Mais recente)' },
+    ],
+    detect: k => false,
+    call: _callDeepSeek,
+  },
+  qwen: {
+    name: 'Alibaba Qwen',
+    logo: '🌐',
+    desc: 'dashscope.aliyuncs.com · requer proxy · platform.aliyun.com',
+    placeholder: 'sk-...',
+    color: '#7b61ff',
+    cors: false,
+    models: [
+      { id:'qwen-max',               label:'Qwen Max (Melhor qualidade)' },
+      { id:'qwen-plus',              label:'Qwen Plus (Balanceado)' },
+      { id:'qwen-turbo',             label:'Qwen Turbo (Rápido)' },
+      { id:'qwen2.5-72b-instruct',   label:'Qwen 2.5 72B (Código)' },
+      { id:'qwen2.5-coder-32b-instruct', label:'Qwen 2.5 Coder 32B (Especialista código)' },
+      { id:'qwen3-235b-a22b',        label:'Qwen3 235B (Mais potente)' },
+      { id:'qwen3-32b',              label:'Qwen3 32B (Rápido)' },
+    ],
+    detect: k => false,
+    call: _callQwen,
+  },
+};
+
+// Load saved provider configs from localStorage
+let _providerConfigs = {};
+try { _providerConfigs = JSON.parse(localStorage.getItem('kaezar_providers') || '{}'); } catch(e){}
+
+// Active provider state (what's actually being used for AI calls)
+let _activeProvider = localStorage.getItem('kaezar_active_provider') || 'anthropic';
+
+// Legacy compat — derive apiKey/aiModel from active provider
+let apiKey  = (_providerConfigs[_activeProvider]||{}).key   || '';
+let aiModel = (_providerConfigs[_activeProvider]||{}).model || AI_PROVIDERS[_activeProvider].models[0].id;
+
+// Modal state: which provider tab is currently open
+let _modalProvider = _activeProvider;
+
+// ── Init modal on load ──
+(function _initProviderModal(){
+  switchProvider(_activeProvider, null);
+  _renderSavedProviders();
+  // Update AI badge
+  if (apiKey) document.getElementById('ai-status').textContent = '✓ Conectado';
+})();
+
+// ── GLOBALS ──
+const canvas2d = document.getElementById('gameCanvas');
+const ctx2d = canvas2d.getContext('2d');
+const canvas3d = document.getElementById('threeCanvas');
+
+let EID = 0;
+let entities = [];
+let selectedId = null;
+let tool = 'select';
+let snapEnabled = false;
+let showGrid = true;
+let showGizmos = true;
+let pivotMode = 'center';
+let vpMode = 'scene';
+let playing = false;
+let paused = false;
+let gameState = null;
+let engineMode = '2d'; // '2d' | '3d'
+let scriptEditingId = null;
+
+let cam = { x:0, y:0, zoom:1 };
+let gridSize = 32;
+let bgColor = '#0a0d1a';
+let sceneName = 'Nova Cena';
+
+const keys = {};
+const mouse = { x:0, y:0, wx:0, wy:0, down:false, button:0 };
+let dragStart = null;
+let dragEntity = null;
+
+let undoStack = [];
+let redoStack = [];
+
+let fps = 60;
+let lastFrameTime = performance.now();
+let frameCount = 0;
+let fpsTimer = 0;
+
+// ── THREE.JS SETUP ──
+let three = null; // { scene, camera, renderer, controls }
+function initThreeJS() {
+  if (three) return;
+  const w = canvas3d.parentElement.clientWidth;
+  const h = canvas3d.parentElement.clientHeight;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0d1a);
+  scene.fog = new THREE.FogExp2(0x0a0d1a, 0.05);
+
+  const camera = new THREE.PerspectiveCamera(60, w/h, 0.1, 1000);
+  camera.position.set(5, 5, 10);
+  camera.lookAt(0,0,0);
+
+  const renderer = new THREE.WebGLRenderer({ canvas: canvas3d, antialias:true });
+  renderer.setSize(w, h);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  // Grid helper
+  const grid = new THREE.GridHelper(20, 20, 0x253060, 0x182040);
+  scene.add(grid);
+
+  // Ambient light
+  const ambient = new THREE.AmbientLight(0x223366, 0.6);
+  scene.add(ambient);
+
+  // Default directional light
+  const dirLight = new THREE.DirectionalLight(0x00e5ff, 0.8);
+  dirLight.position.set(5, 10, 5);
+  dirLight.castShadow = true;
+  scene.add(dirLight);
+
+  // Axes
+  const axes = new THREE.AxesHelper(2);
+  scene.add(axes);
+
+  // Orbit control — spherical exposed on `three` for touch access
+  let isDragging3d = false, prevMouse3d = {x:0,y:0};
+  const spherical = { theta: 0.6, phi: 0.8, radius: 14 };
+
+  function updateCam3D() {
+    camera.position.set(
+      spherical.radius * Math.sin(spherical.phi) * Math.sin(spherical.theta),
+      spherical.radius * Math.cos(spherical.phi),
+      spherical.radius * Math.sin(spherical.phi) * Math.cos(spherical.theta)
+    );
+    camera.lookAt(0,0,0);
+  }
+  updateCam3D();
+
+  canvas3d.addEventListener('mousedown', e => { isDragging3d = true; prevMouse3d = {x:e.clientX, y:e.clientY}; });
+  canvas3d.addEventListener('mousemove', e => {
+    if (!isDragging3d) return;
+    const dx = (e.clientX - prevMouse3d.x) * 0.01;
+    const dy = (e.clientY - prevMouse3d.y) * 0.01;
+    spherical.theta -= dx;
+    spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi + dy));
+    prevMouse3d = {x:e.clientX, y:e.clientY};
+    updateCam3D();
+  });
+  canvas3d.addEventListener('mouseup', () => isDragging3d = false);
+  canvas3d.addEventListener('mouseleave', () => isDragging3d = false);
+  canvas3d.addEventListener('wheel', e => {
+    e.preventDefault();
+    spherical.radius = Math.max(2, Math.min(60, spherical.radius + e.deltaY * 0.02));
+    updateCam3D();
+  }, { passive: false });
+
+  // Touch orbit — single finger = orbit, two fingers = pinch zoom
+  let t3prev = null, t3pinchDist = null;
+  canvas3d.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+      t3prev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      t3pinchDist = null;
+    } else if (e.touches.length === 2) {
+      t3prev = null;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      t3pinchDist = Math.sqrt(dx*dx + dy*dy);
+    }
+  }, { passive: false });
+  canvas3d.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches.length === 1 && t3prev) {
+      const dx = (e.touches[0].clientX - t3prev.x) * 0.012;
+      const dy = (e.touches[0].clientY - t3prev.y) * 0.012;
+      spherical.theta -= dx;
+      spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi + dy));
+      t3prev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      updateCam3D();
+    } else if (e.touches.length === 2 && t3pinchDist !== null) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      spherical.radius = Math.max(2, Math.min(60, spherical.radius - (dist - t3pinchDist) * 0.05));
+      t3pinchDist = dist;
+      updateCam3D();
+    }
+  }, { passive: false });
+  canvas3d.addEventListener('touchend', e => {
+    e.preventDefault();
+    t3prev = null; t3pinchDist = null;
+  }, { passive: false });
+
+  three = { scene, camera, renderer, updateCam3D, spherical };
+  log('Three.js r128 inicializado — Modo 3D pronto', 'info');
+}
+
+function resizeThree() {
+  if (!three) return;
+  const w = canvas3d.parentElement.clientWidth;
+  const h = canvas3d.parentElement.clientHeight - 32;
+  three.renderer.setSize(w, h);
+  three.camera.aspect = w / h;
+  three.camera.updateProjectionMatrix();
+}
+
+// ── ENTITY SYSTEM ──
+class Entity {
+  constructor(name, type = 'Empty', dim = '2d') {
+    this.id = ++EID;
+    this.name = name;
+    this.type = type;
+    this.dim = dim; // '2d' | '3d'
+    this.visible = true;
+    this.active = true;
+    this.parentId = null;
+    this.components = {
+      transform: { x:0, y:0, z:0, rotation:0, rotX:0, rotY:0, rotZ:0, scaleX:1, scaleY:1, scaleZ:1 }
+    };
+    this.tags = [];
+    this.layer = 'Default';
+    this.script = '';
+    this._runtime = {};
+    this._mesh = null; // Three.js mesh reference
+
+    // Type defaults
+    switch(type) {
+      case 'Rect':
+        this.components.renderer = { type:'rect', w:80, h:60, color:'#7c6af7', alpha:1 };
+        break;
+      case 'Circle':
+        this.components.renderer = { type:'circle', r:40, color:'#00e5ff', alpha:1 };
+        break;
+      case 'Text':
+        this.components.renderer = { type:'text', text:'Texto', font:'16px Space Mono', color:'#fff', align:'center' };
+        break;
+      case 'Sprite':
+        this.components.renderer = { type:'sprite', src:'', w:64, h:64, color:'#4ade80', alpha:1 };
+        break;
+      case 'Camera':
+        this.components.camera = { fov:60, bg:'#0a0d1a', isMain:true };
+        break;
+      case 'Light':
+        this.components.light = { color:'#00e5ff', intensity:1.0, radius:200 };
+        break;
+      // 3D types
+      case 'Box':
+        this.components.mesh3d = { geometry:'box', w:1, h:1, d:1, color:'#7c4dff', wireframe:false, metalness:.3, roughness:.7 };
+        break;
+      case 'Sphere':
+        this.components.mesh3d = { geometry:'sphere', r:0.5, color:'#00e5ff', wireframe:false, metalness:.5, roughness:.4 };
+        break;
+      case 'Cylinder':
+        this.components.mesh3d = { geometry:'cylinder', rt:0.5, rb:0.5, h:1, color:'#ff6b35', wireframe:false, metalness:.3, roughness:.7 };
+        break;
+      case 'Plane':
+        this.components.mesh3d = { geometry:'plane', w:5, h:5, color:'#253060', wireframe:false, metalness:0, roughness:1 };
+        break;
+      case 'Camera3D':
+        this.components.camera3d = { fov:60, near:0.1, far:500, isMain:true };
+        break;
+      case 'PointLight3D':
+        this.components.light3d = { color:'#00e5ff', intensity:2, distance:20, castShadow:true };
+        break;
+    }
+  }
+}
+
+// ── CREATE ENTITIES ──
+function createEntity2D(type, x, y) {
+  pushUndo();
+  const names = { Rect:'Rect', Circle:'Círculo', Text:'Texto', Sprite:'Sprite', Camera:'Câmera', Light:'Luz' };
+  const base = names[type] || type;
+  const count = entities.filter(e => e.type===type).length + 1;
+  const e = new Entity(`${base} ${count}`, type, '2d');
+  if (x!==undefined) e.components.transform.x = snapEnabled ? Math.round(x/gridSize)*gridSize : x;
+  if (y!==undefined) e.components.transform.y = snapEnabled ? Math.round(y/gridSize)*gridSize : y;
+  entities.push(e);
+  selectEntity(e.id);
+  refreshHierarchy();
+  log(`Criado [2D]: ${e.name}`, 'info');
+  return e;
+}
+
+function createEntity3D(type, x, y, z) {
+  if (!three) initThreeJS();
+  pushUndo();
+  const names = { Box:'Cubo', Sphere:'Esfera', Cylinder:'Cilindro', Plane:'Plano', Camera3D:'Câmera3D', PointLight3D:'Luz3D' };
+  const base = names[type] || type;
+  const count = entities.filter(e => e.type===type).length + 1;
+  const e = new Entity(`${base} ${count}`, type, '3d');
+  e.components.transform.x = x||0;
+  e.components.transform.y = y||0;
+  e.components.transform.z = z||0;
+  entities.push(e);
+  // Build Three.js mesh
+  buildMesh(e);
+  selectEntity(e.id);
+  refreshHierarchy();
+  log(`Criado [3D]: ${e.name}`, 'info');
+  return e;
+}
+
+function buildMesh(e) {
+  if (!three || !e.components.mesh3d) return;
+  // Remove old
+  if (e._mesh) { three.scene.remove(e._mesh); e._mesh = null; }
+  const m = e.components.mesh3d;
+  let geo;
+  switch(m.geometry) {
+    case 'box': geo = new THREE.BoxGeometry(m.w||1, m.h||1, m.d||1); break;
+    case 'sphere': geo = new THREE.SphereGeometry(m.r||0.5, 32, 32); break;
+    case 'cylinder': geo = new THREE.CylinderGeometry(m.rt||0.5, m.rb||0.5, m.h||1, 32); break;
+    case 'plane': geo = new THREE.PlaneGeometry(m.w||5, m.h||5); break;
+    default: geo = new THREE.BoxGeometry(1,1,1);
+  }
+  const mat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(m.color||'#7c4dff'),
+    wireframe: m.wireframe||false,
+    metalness: m.metalness||0.3,
+    roughness: m.roughness||0.7
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(e.components.transform.x, e.components.transform.y, e.components.transform.z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  three.scene.add(mesh);
+  e._mesh = mesh;
+}
+
+// ── 3D LIGHTS ──
+function buildLight3D(e) {
+  if (!three || !e.components.light3d) return;
+  if (e._mesh) { three.scene.remove(e._mesh); e._mesh = null; }
+  const l = e.components.light3d;
+  const light = new THREE.PointLight(new THREE.Color(l.color||'#fff'), l.intensity||1, l.distance||20);
+  light.position.set(e.components.transform.x, e.components.transform.y+2, e.components.transform.z);
+  light.castShadow = l.castShadow;
+  three.scene.add(light);
+  e._mesh = light;
+}
+
+function selectEntity(id) {
+  selectedId = id;
+  refreshHierarchy();
+  refreshInspector();
+}
+
+function deleteSelected() {
+  if (!selectedId) return;
+  pushUndo();
+  const e = entities.find(e=>e.id===selectedId);
+  if (e && e._mesh && three) three.scene.remove(e._mesh);
+  entities = entities.filter(e=>e.id!==selectedId);
+  selectedId = null;
+  refreshHierarchy();
+  refreshInspector();
+  log('Objeto deletado', 'warn');
+}
+
+function duplicateSelected() {
+  if (!selectedId) return;
+  const src = entities.find(e=>e.id===selectedId);
+  if (!src) return;
+  pushUndo();
+  const copy = JSON.parse(JSON.stringify(src));
+  copy.id = ++EID;
+  copy.name = src.name + ' (cópia)';
+  copy.components.transform.x += 1.2;
+  copy._mesh = null;
+  copy._runtime = {};
+  entities.push(copy);
+  if (copy.dim==='3d') buildMesh(copy);
+  selectEntity(copy.id);
+  refreshHierarchy();
+  log(`Duplicado: ${copy.name}`, 'info');
+}
+
+// ── UNDO / REDO ──
+function pushUndo() {
+  const snapshot = entities.map(e => { const c = JSON.parse(JSON.stringify(e)); c._mesh=null; c._runtime={}; return c; });
+  undoStack.push(JSON.stringify({ entities: snapshot, selectedId }));
+  if (undoStack.length>50) undoStack.shift();
+  redoStack = [];
+}
+function undoAction() {
+  if (!undoStack.length) return;
+  const cur = entities.map(e => { const c=JSON.parse(JSON.stringify(e)); c._mesh=null; c._runtime={}; return c; });
+  redoStack.push(JSON.stringify({ entities: cur, selectedId }));
+  const state = JSON.parse(undoStack.pop());
+  restoreState(state);
+  log('Desfazer', 'info');
+}
+function redoAction() {
+  if (!redoStack.length) return;
+  const cur = entities.map(e => { const c=JSON.parse(JSON.stringify(e)); c._mesh=null; c._runtime={}; return c; });
+  undoStack.push(JSON.stringify({ entities: cur, selectedId }));
+  const state = JSON.parse(redoStack.pop());
+  restoreState(state);
+  log('Refazer', 'info');
+}
+function restoreState(state) {
+  // Clear 3D scene meshes
+  if (three) entities.forEach(e => { if(e._mesh) three.scene.remove(e._mesh); });
+  entities = state.entities.map(d => {
+    const e = Object.assign(new Entity(''), d);
+    e._mesh = null; e._runtime = {};
+    if (e.dim==='3d' && e.components.mesh3d) buildMesh(e);
+    if (e.dim==='3d' && e.components.light3d) buildLight3D(e);
+    return e;
+  });
+  selectedId = state.selectedId;
+  refreshHierarchy(); refreshInspector();
+}
+
+// ── HIERARCHY ──
+function refreshHierarchy() {
+  const el = document.getElementById('hierarchy');
+  el.innerHTML = '';
+  entities.forEach(e => {
+    const item = document.createElement('div');
+    item.className = 'hier-item' + (e.id===selectedId ? ' selected' : '');
+    item.innerHTML = `
+      <span class="ei">${entityIcon(e.type)}</span>
+      <span class="ename">${e.name}</span>
+      ${e.dim==='3d' ? '<span class="e3d">3D</span>' : ''}
+      <span class="evis" onclick="toggleVisible(event,${e.id})">${e.visible?'👁':'🚫'}</span>
+    `;
+    item.onclick = () => selectEntity(e.id);
+    item.ondblclick = () => renameEntity(e.id);
+    el.appendChild(item);
+  });
+  document.getElementById('obj-count').textContent = entities.length;
+}
+
+function entityIcon(type) {
+  const icons = { Rect:'□', Circle:'◯', Text:'T', Sprite:'🖼', Camera:'🎥', Light:'💡',
+    Box:'📦', Sphere:'🔵', Cylinder:'🔷', Plane:'▭', Camera3D:'🎥', PointLight3D:'💡' };
+  return icons[type] || '○';
+}
+
+function toggleVisible(ev, id) {
+  ev.stopPropagation();
+  const e = entities.find(e=>e.id===id);
+  if (e) {
+    e.visible = !e.visible;
+    if (e._mesh) e._mesh.visible = e.visible;
+    refreshHierarchy();
+  }
+}
+
+function renameEntity(id) {
+  const e = entities.find(e=>e.id===id);
+  if (!e) return;
+  const name = prompt('Renomear:', e.name);
+  if (name && name.trim()) { pushUndo(); e.name = name.trim(); refreshHierarchy(); }
+}
+
+// ── INSPECTOR ──
+function refreshInspector() {
+  const empty = document.getElementById('inspector-empty');
+  const insp = document.getElementById('inspector');
+  if (!selectedId) { empty.style.display='block'; insp.style.display='none'; return; }
+  const e = entities.find(e=>e.id===selectedId);
+  if (!e) { empty.style.display='block'; insp.style.display='none'; return; }
+  empty.style.display='none'; insp.style.display='block';
+
+  const is3d = e.dim==='3d';
+  insp.innerHTML = `
+    <div style="padding:8px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+      <input type="checkbox" ${e.active?'checked':''} class="prop-check" onchange="setEntityProp(${e.id},'active',this.checked)">
+      <input value="${e.name}" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:4px 8px;color:var(--text);font-family:inherit;font-size:12px;font-weight:700;outline:none;" onchange="setEntityProp(${e.id},'name',this.value)" onfocus="this.select()">
+      <span style="font-size:9px;color:${is3d?'var(--accent2)':'var(--accent)'};background:${is3d?'rgba(124,77,255,.15)':'rgba(0,229,255,.1)'};padding:2px 7px;border-radius:3px;font-family:'Oxanium',sans-serif;font-weight:700;">${is3d?'3D':'2D'}</span>
+    </div>
+    ${buildTransformComp(e)}
+    ${buildRendererComp(e)}
+    ${buildMesh3DComp(e)}
+    ${buildLight3DComp(e)}
+    ${buildScriptComp(e)}
+    <button class="add-comp-btn" onclick="openAddComp(${e.id})">＋ Adicionar Componente</button>
+  `;
+}
+
+function buildTransformComp(e) {
+  const t = e.components.transform;
+  const is3d = e.dim==='3d';
+  return `
+  <div class="comp-block">
+    <div class="comp-header"><span>⊕</span><span class="comp-title">Transform${is3d?'<span class="comp-3d-badge">3D</span>':''}</span></div>
+    <div class="comp-body">
+      <div class="prop-row">
+        <span class="prop-label">Posição</span>
+        <div class="xyz-row">
+          <div class="xyz-field"><span class="xyz-label x">X</span><input class="xyz-input" type="number" value="${t.x.toFixed(2)}" step="0.1" onchange="setTransform(${e.id},'x',parseFloat(this.value))"></div>
+          <div class="xyz-field"><span class="xyz-label y">Y</span><input class="xyz-input" type="number" value="${t.y.toFixed(2)}" step="0.1" onchange="setTransform(${e.id},'y',parseFloat(this.value))"></div>
+          ${is3d?`<div class="xyz-field"><span class="xyz-label z">Z</span><input class="xyz-input" type="number" value="${(t.z||0).toFixed(2)}" step="0.1" onchange="setTransform(${e.id},'z',parseFloat(this.value))"></div>`:''}
+        </div>
+      </div>
+      <div class="prop-row">
+        <span class="prop-label">Rotação</span>
+        <div class="xyz-row">
+          ${is3d ? `
+          <div class="xyz-field"><span class="xyz-label x">X</span><input class="xyz-input" type="number" value="${(t.rotX||0).toFixed(1)}" step="1" onchange="setTransform(${e.id},'rotX',parseFloat(this.value))"></div>
+          <div class="xyz-field"><span class="xyz-label y">Y</span><input class="xyz-input" type="number" value="${(t.rotY||0).toFixed(1)}" step="1" onchange="setTransform(${e.id},'rotY',parseFloat(this.value))"></div>
+          <div class="xyz-field"><span class="xyz-label z">Z</span><input class="xyz-input" type="number" value="${(t.rotZ||0).toFixed(1)}" step="1" onchange="setTransform(${e.id},'rotZ',parseFloat(this.value))"></div>
+          ` : `<input class="prop-input" type="number" value="${t.rotation.toFixed(1)}" step="0.5" onchange="setTransform(${e.id},'rotation',parseFloat(this.value))">`}
+        </div>
+      </div>
+      <div class="prop-row">
+        <span class="prop-label">Escala</span>
+        <div class="xyz-row">
+          <div class="xyz-field"><span class="xyz-label x">X</span><input class="xyz-input" type="number" value="${t.scaleX.toFixed(2)}" step="0.1" onchange="setTransform(${e.id},'scaleX',parseFloat(this.value))"></div>
+          <div class="xyz-field"><span class="xyz-label y">Y</span><input class="xyz-input" type="number" value="${t.scaleY.toFixed(2)}" step="0.1" onchange="setTransform(${e.id},'scaleY',parseFloat(this.value))"></div>
+          ${is3d?`<div class="xyz-field"><span class="xyz-label z">Z</span><input class="xyz-input" type="number" value="${(t.scaleZ||1).toFixed(2)}" step="0.1" onchange="setTransform(${e.id},'scaleZ',parseFloat(this.value))"></div>`:''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildRendererComp(e) {
+  const r = e.components.renderer;
+  if (!r) return '';
+  let fields = '';
+  if (r.type==='rect') fields=`
+    <div class="prop-row"><span class="prop-label">Largura</span><input class="prop-input" type="number" value="${r.w}" onchange="setRendererProp(${e.id},'w',parseFloat(this.value))"></div>
+    <div class="prop-row"><span class="prop-label">Altura</span><input class="prop-input" type="number" value="${r.h}" onchange="setRendererProp(${e.id},'h',parseFloat(this.value))"></div>
+    <div class="prop-row"><span class="prop-label">Cor</span><input type="color" class="prop-color" value="${r.color}" onchange="setRendererProp(${e.id},'color',this.value)"></div>
+    <div class="prop-row"><span class="prop-label">Alpha</span><input class="prop-input" type="number" value="${r.alpha}" min="0" max="1" step="0.05" onchange="setRendererProp(${e.id},'alpha',parseFloat(this.value))"></div>`;
+  else if (r.type==='circle') fields=`
+    <div class="prop-row"><span class="prop-label">Raio</span><input class="prop-input" type="number" value="${r.r}" onchange="setRendererProp(${e.id},'r',parseFloat(this.value))"></div>
+    <div class="prop-row"><span class="prop-label">Cor</span><input type="color" class="prop-color" value="${r.color}" onchange="setRendererProp(${e.id},'color',this.value)"></div>`;
+  else if (r.type==='text') fields=`
+    <div class="prop-row"><span class="prop-label">Texto</span><input class="prop-input" value="${r.text}" onchange="setRendererProp(${e.id},'text',this.value)"></div>
+    <div class="prop-row"><span class="prop-label">Cor</span><input type="color" class="prop-color" value="${r.color||'#ffffff'}" onchange="setRendererProp(${e.id},'color',this.value)"></div>`;
+  return `
+  <div class="comp-block">
+    <div class="comp-header"><span>🎨</span><span class="comp-title">Renderer 2D (${r.type})</span></div>
+    <div class="comp-body">${fields}</div>
+  </div>`;
+}
+
+function buildMesh3DComp(e) {
+  const m = e.components.mesh3d;
+  if (!m) return '';
+  return `
+  <div class="comp-block">
+    <div class="comp-header"><span>📦</span><span class="comp-title">Mesh 3D <span class="comp-3d-badge">3D</span></span></div>
+    <div class="comp-body">
+      <div class="prop-row"><span class="prop-label">Geometria</span><span style="color:var(--accent2);font-size:11px;">${m.geometry}</span></div>
+      <div class="prop-row"><span class="prop-label">Cor</span><input type="color" class="prop-color" value="${m.color}" onchange="setMesh3DProp(${e.id},'color',this.value)"></div>
+      <div class="prop-row"><span class="prop-label">Wireframe</span><input type="checkbox" class="prop-check" ${m.wireframe?'checked':''} onchange="setMesh3DProp(${e.id},'wireframe',this.checked)"></div>
+      <div class="prop-row"><span class="prop-label">Metalness</span><input class="prop-input" type="number" value="${m.metalness}" min="0" max="1" step="0.05" onchange="setMesh3DProp(${e.id},'metalness',parseFloat(this.value))"></div>
+      <div class="prop-row"><span class="prop-label">Roughness</span><input class="prop-input" type="number" value="${m.roughness}" min="0" max="1" step="0.05" onchange="setMesh3DProp(${e.id},'roughness',parseFloat(this.value))"></div>
+    </div>
+  </div>`;
+}
+
+function buildLight3DComp(e) {
+  const l = e.components.light3d;
+  if (!l) return '';
+  return `
+  <div class="comp-block">
+    <div class="comp-header"><span>💡</span><span class="comp-title">Point Light <span class="comp-3d-badge">3D</span></span></div>
+    <div class="comp-body">
+      <div class="prop-row"><span class="prop-label">Cor</span><input type="color" class="prop-color" value="${l.color}" onchange="setLight3DProp(${e.id},'color',this.value)"></div>
+      <div class="prop-row"><span class="prop-label">Intensidade</span><input class="prop-input" type="number" value="${l.intensity}" min="0" step="0.1" onchange="setLight3DProp(${e.id},'intensity',parseFloat(this.value))"></div>
+      <div class="prop-row"><span class="prop-label">Distância</span><input class="prop-input" type="number" value="${l.distance}" onchange="setLight3DProp(${e.id},'distance',parseFloat(this.value))"></div>
+    </div>
+  </div>`;
+}
+
+function buildScriptComp(e) {
+  if (e.script === undefined) return '';
+  return `
+  <div class="comp-block">
+    <div class="comp-header"><span>📜</span><span class="comp-title">Script</span></div>
+    <div class="comp-body">
+      <div style="font-size:10px;color:${e.script?'var(--green)':'var(--text3)'};">${e.script?'✅ Script anexado':'⬜ Sem script'}</div>
+      <button style="margin-top:6px;padding:4px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:3px;color:var(--text2);font-family:inherit;font-size:10px;cursor:pointer;" onclick="openScriptEditor(${e.id})">✏ Editar Script</button>
+    </div>
+  </div>`;
+}
+
+// ── PROP SETTERS ──
+function setEntityProp(id, key, val) {
+  const e = entities.find(e=>e.id===id);
+  if (!e) return;
+  pushUndo();
+  e[key] = val;
+  if (key==='name') refreshHierarchy();
+}
+
+function setTransform(id, key, val) {
+  const e = entities.find(e=>e.id===id);
+  if (!e) return;
+  e.components.transform[key] = val;
+  if (e._mesh) {
+    if (key==='x') e._mesh.position.x = val;
+    if (key==='y') e._mesh.position.y = val;
+    if (key==='z') e._mesh.position.z = val;
+    if (key==='rotX') e._mesh.rotation.x = THREE.MathUtils.degToRad(val);
+    if (key==='rotY') e._mesh.rotation.y = THREE.MathUtils.degToRad(val);
+    if (key==='rotZ') e._mesh.rotation.z = THREE.MathUtils.degToRad(val);
+    if (key==='scaleX') e._mesh.scale.x = val;
+    if (key==='scaleY') e._mesh.scale.y = val;
+    if (key==='scaleZ') e._mesh.scale.z = val;
+  }
+}
+
+function setRendererProp(id, key, val) {
+  const e = entities.find(e=>e.id===id);
+  if (e && e.components.renderer) e.components.renderer[key] = val;
+}
+
+function setMesh3DProp(id, key, val) {
+  const e = entities.find(e=>e.id===id);
+  if (!e || !e.components.mesh3d) return;
+  e.components.mesh3d[key] = val;
+  if (e._mesh && e._mesh.material) {
+    if (key==='color') e._mesh.material.color.set(val);
+    if (key==='wireframe') e._mesh.material.wireframe = val;
+    if (key==='metalness') e._mesh.material.metalness = val;
+    if (key==='roughness') e._mesh.material.roughness = val;
+  }
+}
+
+function setLight3DProp(id, key, val) {
+  const e = entities.find(e=>e.id===id);
+  if (!e || !e.components.light3d) return;
+  e.components.light3d[key] = val;
+  if (e._mesh && e._mesh.isLight) {
+    if (key==='color') e._mesh.color.set(val);
+    if (key==='intensity') e._mesh.intensity = val;
+    if (key==='distance') e._mesh.distance = val;
+  }
+}
+
+function openAddComp(id) {
+  const comp = prompt('Componente:\nRigidbody2D, Collider2D, Script, MeshRenderer, Rigidbody3D');
+  if (!comp) return;
+  addComponentToSelected(comp.trim());
+}
+
+function addComponentToSelected(comp) {
+  const e = entities.find(e=>e.id===selectedId);
+  if (!e) return;
+  pushUndo();
+  if (comp==='Rigidbody2D') e.components.rigidbody2d = { mass:1, gravityScale:0, isKinematic:false, vx:0, vy:0 };
+  else if (comp==='Collider2D') e.components.collider2d = { shape:'rect', isTrigger:false, offsetX:0, offsetY:0 };
+  else if (comp==='Script') e.script = '// script\nfunction Start(){}\nfunction Update(dt){}';
+  refreshInspector();
+  log(`Componente adicionado: ${comp}`, 'info');
+}
+
+// ── SCRIPT EDITOR ──
+function openScriptEditor(id) {
+  const e = entities.find(e=>e.id===id);
+  if (!e) return;
+  scriptEditingId = id;
+  document.getElementById('script-modal-entity').textContent = e.name;
+  document.getElementById('script-modal-editor').value = e.script || '// Script do objeto\nfunction Start() {\n  // executado uma vez\n}\n\nfunction Update(dt) {\n  // dt = delta time em segundos\n}';
+  openModal('script-modal');
+}
+
+function saveScriptModal() {
+  const e = entities.find(e=>e.id===scriptEditingId);
+  if (!e) return;
+  e.script = document.getElementById('script-modal-editor').value;
+  closeModal('script-modal');
+  refreshInspector();
+  log(`Script salvo: ${e.name}`, 'info');
+}
+
+function saveScript() {
+  if (!scriptEditingId) return;
+  const e = entities.find(e=>e.id===scriptEditingId);
+  if (!e) return;
+  e.script = document.getElementById('script-editor').value;
+  log(`Script salvo: ${e.name}`, 'info');
+}
+
+function openScriptPanel(id) {
+  const e = entities.find(e=>e.id===id);
+  if (!e) return;
+  scriptEditingId = id;
+  document.getElementById('script-entity-name').textContent = e.name;
+  document.getElementById('script-editor').value = e.script||'';
+  switchBtmTab(document.querySelector('.btm-tab:nth-child(2)'), 'script-panel');
+}
+
+// ── 2D RENDER ──
+function resizeCanvas() {
+  const wrap = document.getElementById('canvas-wrap');
+  canvas2d.width = wrap.clientWidth;
+  canvas2d.height = wrap.clientHeight;
+}
+
+function drawGrid() {
+  if (!showGrid) return;
+  const gs = gridSize * cam.zoom;
+  const ox = (canvas2d.width/2 + cam.x * cam.zoom) % gs;
+  const oy = (canvas2d.height/2 + cam.y * cam.zoom) % gs;
+  ctx2d.save();
+  ctx2d.strokeStyle = 'rgba(37,40,72,.7)';
+  ctx2d.lineWidth = 1;
+  for (let x = ox - gs; x < canvas2d.width; x += gs) {
+    ctx2d.beginPath(); ctx2d.moveTo(x,0); ctx2d.lineTo(x, canvas2d.height); ctx2d.stroke();
+  }
+  for (let y = oy - gs; y < canvas2d.height; y += gs) {
+    ctx2d.beginPath(); ctx2d.moveTo(0,y); ctx2d.lineTo(canvas2d.width, y); ctx2d.stroke();
+  }
+  ctx2d.restore();
+}
+
+function worldToScreen(wx, wy) {
+  return {
+    x: canvas2d.width/2 + (wx + cam.x) * cam.zoom,
+    y: canvas2d.height/2 + (wy + cam.y) * cam.zoom
+  };
+}
+
+function screenToWorld(sx, sy) {
+  return {
+    x: (sx - canvas2d.width/2) / cam.zoom - cam.x,
+    y: (sy - canvas2d.height/2) / cam.zoom - cam.y
+  };
+}
+
+function drawEntity(e) {
+  if (!e.visible || e.dim!=='2d') return;
+  const t = e.components.transform;
+  const pos = worldToScreen(t.x, t.y);
+  const r = e.components.renderer;
+  ctx2d.save();
+  ctx2d.translate(pos.x, pos.y);
+  if (t.rotation) ctx2d.rotate(t.rotation * Math.PI / 180);
+  ctx2d.scale(t.scaleX, t.scaleY);
+
+  if (r) {
+    ctx2d.globalAlpha = r.alpha !== undefined ? r.alpha : 1;
+    if (r.type==='rect') {
+      ctx2d.fillStyle = r.color;
+      ctx2d.fillRect(-r.w*cam.zoom/2, -r.h*cam.zoom/2, r.w*cam.zoom, r.h*cam.zoom);
+    } else if (r.type==='circle') {
+      ctx2d.fillStyle = r.color;
+      ctx2d.beginPath(); ctx2d.arc(0,0,r.r*cam.zoom,0,Math.PI*2); ctx2d.fill();
+    } else if (r.type==='text') {
+      ctx2d.fillStyle = r.color;
+      ctx2d.font = r.font;
+      ctx2d.textAlign = r.align||'center';
+      ctx2d.fillText(r.text, 0, 0);
+    } else if (r.type==='sprite') {
+      ctx2d.fillStyle = r.color;
+      ctx2d.fillRect(-r.w*cam.zoom/2, -r.h*cam.zoom/2, r.w*cam.zoom, r.h*cam.zoom);
+      ctx2d.strokeStyle = 'rgba(255,255,255,.2)';
+      ctx2d.lineWidth=1;
+      ctx2d.strokeRect(-r.w*cam.zoom/2, -r.h*cam.zoom/2, r.w*cam.zoom, r.h*cam.zoom);
+    }
+  }
+  // Light
+  if (e.components.light) {
+    const l = e.components.light;
+    const grd = ctx2d.createRadialGradient(0,0,0,0,0,l.radius*cam.zoom);
+    grd.addColorStop(0, l.color + '33');
+    grd.addColorStop(1, 'transparent');
+    ctx2d.fillStyle = grd;
+    ctx2d.beginPath(); ctx2d.arc(0,0,l.radius*cam.zoom,0,Math.PI*2); ctx2d.fill();
+  }
+  ctx2d.globalAlpha = 1;
+  ctx2d.restore();
+
+  // Gizmo
+  if (showGizmos && e.id===selectedId) {
+    ctx2d.save();
+    ctx2d.translate(pos.x, pos.y);
+    ctx2d.strokeStyle = '#00e5ff';
+    ctx2d.lineWidth = 1.5;
+    ctx2d.setLineDash([4,3]);
+    if (r && r.type==='rect') {
+      ctx2d.strokeRect(-r.w*cam.zoom/2-3, -r.h*cam.zoom/2-3, r.w*cam.zoom+6, r.h*cam.zoom+6);
+    } else if (r && r.type==='circle') {
+      ctx2d.beginPath(); ctx2d.arc(0,0,r.r*cam.zoom+4,0,Math.PI*2); ctx2d.stroke();
+    } else {
+      ctx2d.strokeRect(-20,-20,40,40);
+    }
+    ctx2d.setLineDash([]);
+    ctx2d.restore();
+  }
+}
+
+function draw2D() {
+  ctx2d.clearRect(0,0,canvas2d.width, canvas2d.height);
+  ctx2d.fillStyle = bgColor;
+  ctx2d.fillRect(0,0,canvas2d.width, canvas2d.height);
+  drawGrid();
+  entities.filter(e=>e.dim==='2d').forEach(drawEntity);
+}
+
+// ── MAIN LOOP ──
+function mainLoop(now) {
+  const dt = Math.min((now - lastFrameTime) / 1000, 0.05);
+  lastFrameTime = now;
+  frameCount++;
+  fpsTimer += dt;
+  if (fpsTimer >= 0.5) {
+    fps = Math.round(frameCount / fpsTimer);
+    frameCount = 0; fpsTimer = 0;
+    document.getElementById('fps-counter').textContent = fps;
+  }
+
+  if (playing && !paused) runScripts(dt);
+
+  if (engineMode === '2d') {
+    draw2D();
+  } else if (three) {
+    // Update 3D meshes from entity transforms
+    entities.filter(e=>e.dim==='3d').forEach(e => {
+      if (!e._mesh) return;
+      const t = e.components.transform;
+      e._mesh.position.set(t.x, t.y, t.z||0);
+      if (e._mesh.rotation && !e._mesh.isLight) {
+        e._mesh.rotation.set(
+          THREE.MathUtils.degToRad(t.rotX||0),
+          THREE.MathUtils.degToRad(t.rotY||0),
+          THREE.MathUtils.degToRad(t.rotZ||0)
+        );
+        e._mesh.scale.set(t.scaleX, t.scaleY, t.scaleZ||1);
+      }
+    });
+    three.renderer.render(three.scene, three.camera);
+  }
+
+  requestAnimationFrame(mainLoop);
+}
+
+// ── SCRIPTING ENGINE ──
+function runScripts(dt) {
+  entities.forEach(e => {
+    if (!e.script || !e.active) return;
+    try {
+      if (!e._started) {
+        const fn = new Function('Input', `with(this){${e.script}\nif(typeof Start==='function')Start.call(this);}`);
+        fn.call(e, InputSystem);
+        e._started = true;
+      }
+      const fn = new Function('dt', 'Input', `with(this){${e.script}\nif(typeof Update==='function')Update.call(this,dt);}`);
+      fn.call(e, dt, InputSystem);
+    } catch(err) {
+      log(`Script error [${e.name}]: ${err.message}`, 'error');
+      e.script = '';
+    }
+  });
+}
+
+const InputSystem = {
+  _keys: keys,
+  getKey: (k) => !!keys[k],
+  getKeyDown: (k) => !!keys[k]
+};
+
+// ── PLAY / PAUSE / STOP ──
+function playScene() {
+  if (playing) return;
+  gameState = JSON.stringify(entities.map(e => { const c=JSON.parse(JSON.stringify(e)); c._mesh=null; c._runtime={}; return c; }));
+  playing = true; paused = false;
+  entities.forEach(e => { e._started = false; e._runtime = {}; });
+  document.body.classList.add('playing');
+  document.getElementById('play-status').innerHTML = '▶ <b>Play</b>';
+  document.getElementById('btn-play').classList.add('playing');
+  log('▶ Play iniciado', 'info');
+}
+function pauseScene() {
+  if (!playing) return;
+  paused = !paused;
+  document.getElementById('play-status').innerHTML = paused ? '⏸ <b>Pausado</b>' : '▶ <b>Play</b>';
+  log(paused?'⏸ Pausado':'▶ Retomado', 'info');
+}
+function stopScene() {
+  if (!playing) return;
+  playing = false; paused = false;
+  document.body.classList.remove('playing');
+  document.getElementById('play-status').innerHTML = '■ <b>Parado</b>';
+  document.getElementById('btn-play').classList.remove('playing');
+  if (gameState) {
+    if (three) entities.forEach(e => { if(e._mesh) three.scene.remove(e._mesh); });
+    const saved = JSON.parse(gameState);
+    entities = saved.map(d => {
+      const e = Object.assign(new Entity(''), d);
+      e._mesh = null; e._runtime = {};
+      if (e.dim==='3d' && e.components.mesh3d) buildMesh(e);
+      if (e.dim==='3d' && e.components.light3d) buildLight3D(e);
+      return e;
+    });
+    refreshHierarchy(); refreshInspector();
+    gameState = null;
+  }
+  log('■ Parado', 'warn');
+}
+
+// ── ENGINE MODE SWITCH ──
+function setEngineMode(mode) {
+  engineMode = mode;
+  const c2 = document.getElementById('gameCanvas');
+  const c3 = document.getElementById('threeCanvas');
+  const lbl = document.getElementById('mode-label');
+  const btn2 = document.getElementById('mode-2d-btn');
+  const btn3 = document.getElementById('mode-3d-btn');
+  if (mode==='2d') {
+    c2.style.display='block'; c3.style.display='none';
+    lbl.className='vp-mode-label label2d'; lbl.textContent='2D';
+    btn2.style.opacity='1'; btn3.style.opacity='.5';
+    document.getElementById('engine-mode-status').textContent='2D';
+  } else {
+    c2.style.display='none'; c3.style.display='block';
+    lbl.className='vp-mode-label label3d'; lbl.textContent='3D';
+    btn2.style.opacity='.5'; btn3.style.opacity='1';
+    document.getElementById('engine-mode-status').textContent='3D';
+    initThreeJS();
+    setTimeout(resizeThree, 50);
+  }
+  log(`Modo: ${mode.toUpperCase()}`, 'info');
+}
+
+// ── TOOLS ──
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll('.tool-btn[id^="tool-"]').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById('tool-'+t);
+  if (btn) btn.classList.add('active');
+  const names = { select:'Selecionar', move:'Mover', rotate:'Rotacionar', scale:'Escalar', rect:'Retângulo', circle:'Círculo' };
+  document.getElementById('tool-status') && (document.getElementById('tool-status').textContent = names[t]||t);
+}
+function toggleSnap() {
+  snapEnabled = !snapEnabled;
+  document.getElementById('snap-status').textContent = snapEnabled?'ON':'OFF';
+  document.getElementById('btn-snap').classList.toggle('active', snapEnabled);
+}
+function toggleGrid() { showGrid=!showGrid; }
+function toggleGizmos() { showGizmos=!showGizmos; }
+function togglePivot() { pivotMode = pivotMode==='center'?'pivot':'center'; }
+function resetCamera() { cam={x:0,y:0,zoom:1}; }
+function setZoom(z) { cam.zoom=z; }
+
+// ── CANVAS INTERACTION 2D ──
+canvas2d.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 0.9 : 1.1;
+  cam.zoom = Math.max(0.1, Math.min(10, cam.zoom * factor));
+}, { passive:false });
+
+canvas2d.addEventListener('mousedown', e => {
+  mouse.down = true; mouse.button = e.button;
+  const w = screenToWorld(e.offsetX, e.offsetY);
+  if (e.button===2) { showCtx(e.clientX, e.clientY); return; }
+  if (tool==='move' || tool==='select') {
+    // Pick entity
+    let hit = null;
+    for (let i=entities.length-1;i>=0;i--) {
+      const ent = entities[i];
+      if (!ent.visible || ent.dim!=='2d') continue;
+      const t = ent.components.transform;
+      const r = ent.components.renderer;
+      if (!r) continue;
+      if (r.type==='rect') {
+        if (Math.abs(w.x-t.x)<r.w/2 && Math.abs(w.y-t.y)<r.h/2) { hit=ent; break; }
+      } else if (r.type==='circle') {
+        const dx=w.x-t.x, dy=w.y-t.y;
+        if (Math.sqrt(dx*dx+dy*dy)<r.r) { hit=ent; break; }
+      } else {
+        if (Math.abs(w.x-t.x)<30 && Math.abs(w.y-t.y)<20) { hit=ent; break; }
+      }
+    }
+    if (hit) { selectEntity(hit.id); dragEntity=hit; dragStart={wx:w.x,wy:w.y,ex:hit.components.transform.x,ey:hit.components.transform.y}; }
+    else { selectEntity(null); }
+  }
+  if (tool==='rect') {
+    const ne = createEntity2D('Rect', w.x, w.y);
+    dragEntity = ne; dragStart={wx:w.x,wy:w.y,ex:w.x,ey:w.y};
+  }
+  if (tool==='circle') {
+    const ne = createEntity2D('Circle', w.x, w.y);
+    dragEntity = ne; dragStart={wx:w.x,wy:w.y,ex:w.x,ey:w.y};
+  }
+});
+
+canvas2d.addEventListener('mousemove', e => {
+  const w = screenToWorld(e.offsetX, e.offsetY);
+  mouse.wx = w.x; mouse.wy = w.y;
+  document.getElementById('mouse-world').textContent = `${w.x.toFixed(1)}, ${w.y.toFixed(1)}`;
+  if (!mouse.down) return;
+  if (dragEntity && dragStart) {
+    if (tool==='move'||tool==='select') {
+      const dx=w.x-dragStart.wx, dy=w.y-dragStart.wy;
+      let nx=dragStart.ex+dx, ny=dragStart.ey+dy;
+      if (snapEnabled) { nx=Math.round(nx/gridSize)*gridSize; ny=Math.round(ny/gridSize)*gridSize; }
+      dragEntity.components.transform.x=nx;
+      dragEntity.components.transform.y=ny;
+      if (dragEntity._mesh) dragEntity._mesh.position.set(nx,ny,dragEntity.components.transform.z||0);
+      refreshInspector();
+    }
+    if ((tool==='rect'||tool==='circle') && dragEntity.components.renderer) {
+      const dx=Math.abs(w.x-dragStart.wx), dy=Math.abs(w.y-dragStart.wy);
+      if (dragEntity.components.renderer.type==='rect') {
+        dragEntity.components.renderer.w=Math.max(4,dx*2);
+        dragEntity.components.renderer.h=Math.max(4,dy*2);
+      } else {
+        dragEntity.components.renderer.r=Math.max(4,Math.sqrt(dx*dx+dy*dy));
+      }
+    }
+  }
+  // Middle/right pan
+  if (mouse.button===1 || (mouse.button===2 && mouse.down)) {
+    cam.x += e.movementX / cam.zoom;
+    cam.y += e.movementY / cam.zoom;
+  }
+});
+
+canvas2d.addEventListener('mouseup', () => { mouse.down=false; dragEntity=null; dragStart=null; });
+canvas2d.addEventListener('contextmenu', e => { e.preventDefault(); });
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  keys[e.key] = true;
+  if (e.ctrlKey) {
+    if (e.key==='z') { undoAction(); e.preventDefault(); }
+    if (e.key==='y') { redoAction(); e.preventDefault(); }
+    if (e.key==='d') { duplicateSelected(); e.preventDefault(); }
+    if (e.key==='s') { saveScene(); e.preventDefault(); }
+  }
+  if (!e.ctrlKey) {
+    if (e.key==='q') setTool('select');
+    if (e.key==='w') setTool('move');
+    if (e.key==='e') setTool('rotate');
+    if (e.key==='r') setTool('scale');
+    if (e.key==='Delete') deleteSelected();
+  }
+});
+document.addEventListener('keyup', e => { delete keys[e.key]; });
+
+// ── MENUS ──
+function toggleDD(id) {
+  const menu = document.getElementById(id+'-menu');
+  document.querySelectorAll('.dropdown-menu').forEach(m=>{if(m.id!==id+'-menu')m.classList.remove('open');});
+  menu.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dropdown')) document.querySelectorAll('.dropdown-menu').forEach(m=>m.classList.remove('open'));
+  if (!e.target.closest('#ctx-menu')) hideCtx();
+});
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function openNewEntityModal() {
+  openModal('new-entity-modal');
+  setTimeout(()=>document.getElementById('new-entity-name').focus(), 100);
+}
+
+function confirmCreateEntity() {
+  const name = document.getElementById('new-entity-name').value.trim()||'Objeto';
+  const type = document.getElementById('new-entity-type').value;
+  const dim3d = ['Box','Sphere','Cylinder','Plane','Camera3D','PointLight3D'].includes(type);
+  const e = dim3d ? createEntity3D(type) : createEntity2D(type);
+  e.name = name;
+  refreshHierarchy();
+  closeModal('new-entity-modal');
+}
+
+function applySettings() {
+  gridSize = parseInt(document.getElementById('cfg-grid').value)||32;
+  closeModal('settings-modal');
+  log('Configurações aplicadas', 'info');
+}
+
+function saveAPIKey() {
+  const key   = document.getElementById('api-key-input').value.trim();
+  const model = document.getElementById('ai-model-select').value;
+  const prov  = _modalProvider;
+
+  if (!_providerConfigs[prov]) _providerConfigs[prov] = {};
+  _providerConfigs[prov].key   = key;
+  _providerConfigs[prov].model = model;
+
+  localStorage.setItem('kaezar_providers', JSON.stringify(_providerConfigs));
+
+  // Puter não precisa de key — ativa direto se logado
+  const isPuter = prov === 'puter';
+  const puterLogado = isPuter && typeof puter !== 'undefined' && puter.auth.isSignedIn();
+
+  if (key || puterLogado) {
+    _activeProvider = prov;
+    localStorage.setItem('kaezar_active_provider', prov);
+    apiKey  = key;
+    aiModel = model;
+    document.getElementById('ai-status').textContent = '✓ Conectado';
+    log(`🔑 ${AI_PROVIDERS[prov].name} salvo e ativo!`, 'info');
+  } else if (!key && !isPuter) {
+    // Key cleared — if this was active, find another
+    if (_activeProvider === prov) {
+      const fallback = Object.keys(_providerConfigs).find(p => p !== prov && (_providerConfigs[p]?.key || p === 'puter'));
+      _activeProvider = fallback || 'anthropic';
+      localStorage.setItem('kaezar_active_provider', _activeProvider);
+      apiKey  = (_providerConfigs[_activeProvider]||{}).key   || '';
+      aiModel = (_providerConfigs[_activeProvider]||{}).model || AI_PROVIDERS[_activeProvider].models[0].id;
+    }
+    log(`🔑 ${AI_PROVIDERS[prov].name} removido.`, 'info');
+  }
+
+  _renderSavedProviders();
+  closeModal('api-modal');
+}
+
+function clearCurrentKey() {
+  document.getElementById('api-key-input').value = '';
+  onKeyInput('');
+}
+
+function toggleKeyVis() {
+  const inp = document.getElementById('api-key-input');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function switchProvider(provId, btn) {
+  _modalProvider = provId;
+  const prov = AI_PROVIDERS[provId];
+  if (!prov) return;
+
+  // Update tab buttons
+  document.querySelectorAll('.prov-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    const t = document.querySelector(`.prov-tab[data-prov="${provId}"]`);
+    if (t) t.classList.add('active');
+  }
+
+  // Update badge
+  document.getElementById('agent-logo').textContent = prov.logo;
+  document.getElementById('agent-name').textContent = prov.name;
+  document.getElementById('agent-name').style.color = prov.color;
+  document.getElementById('agent-desc').textContent = prov.desc;
+
+  // Load saved key for this provider
+  const saved = _providerConfigs[provId] || {};
+  const inp = document.getElementById('api-key-input');
+  inp.value       = saved.key || '';
+  inp.placeholder = prov.placeholder;
+
+  // Esconder campo de API key para Puter (não precisa de chave)
+  const keyRow = document.querySelector('.modal-row:has(#api-key-input)') ||
+                 inp.closest('.modal-row');
+  const keyHint = document.getElementById('key-hint');
+  const puterLoginRow = document.getElementById('puter-login-row');
+  if (provId === 'puter') {
+    if (keyRow) keyRow.style.display = 'none';
+    if (keyHint) keyHint.innerHTML = '⚡ <b>Puter.js</b> não precisa de API key. Faça login com sua conta Puter gratuita abaixo.';
+    if (puterLoginRow) puterLoginRow.style.display = 'flex';
+    setTimeout(puterCheckStatus, 300);
+  } else {
+    if (keyRow) keyRow.style.display = 'flex';
+    if (keyHint) keyHint.innerHTML = 'A chave é salva apenas no navegador (localStorage).';
+    if (puterLoginRow) puterLoginRow.style.display = 'none';
+  }
+
+  // Populate model select
+  const sel = document.getElementById('ai-model-select');
+  sel.innerHTML = prov.models.map(m =>
+    `<option value="${m.id}">${m.label}</option>`
+  ).join('');
+  if (saved.model) sel.value = saved.model;
+
+  // Show/hide proxy URL row
+  const proxyRow = document.getElementById('proxy-url-row');
+  const proxyInp = document.getElementById('proxy-url-input');
+  if (proxyRow) {
+    proxyRow.style.display = prov.cors ? 'none' : 'flex';
+    if (proxyInp) proxyInp.value = PROXY_URL;
+  }
+
+  // Update proxy badge for this provider
+  _updateProxyBadge();
+  // _checkProxy() é chamado separadamente após o init completo
+
+  onKeyInput(inp.value);
+}
+
+function onKeyInput(val) {
+  const dot = document.getElementById('agent-status-dot');
+  if (!val) {
+    dot.style.background = 'var(--text3)';
+    dot.style.boxShadow = 'none';
+    return;
+  }
+  // Auto-detect provider from key prefix
+  let detected = null;
+  for (const [id, p] of Object.entries(AI_PROVIDERS)) {
+    if (p.detect(val)) { detected = id; break; }
+  }
+  if (detected && detected !== _modalProvider) {
+    switchProvider(detected, null);
+    document.getElementById('api-key-input').value = val;
+  }
+  dot.style.background = 'var(--green)';
+  dot.style.boxShadow  = '0 0 8px var(--green)';
+}
+
+function _renderSavedProviders() {
+  const list = document.getElementById('saved-providers-list');
+  if (!list) return;
+  const entries = Object.entries(_providerConfigs).filter(([,cfg]) => cfg?.key);
+  if (!entries.length) {
+    list.innerHTML = '<div style="font-size:10px;color:var(--text3);padding:4px 8px;">Nenhum provider salvo ainda.</div>';
+    return;
+  }
+  list.innerHTML = entries.map(([id, cfg]) => {
+    const p = AI_PROVIDERS[id];
+    const isActive = id === _activeProvider;
+    const maskedKey = cfg.key ? cfg.key.slice(0,8) + '••••••••' + cfg.key.slice(-4) : '';
+    return `<div class="saved-prov-row${isActive?' active-prov':''}">
+      <span style="font-size:16px;">${p.logo}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:'Oxanium',sans-serif;font-weight:700;font-size:11px;color:${isActive?'var(--accent)':p.color};">${p.name}${isActive?' ●':''}</div>
+        <div style="font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${maskedKey} · ${cfg.model||''}</div>
+      </div>
+      <button onclick="switchProvider('${id}',null);document.getElementById('api-key-input').value='${cfg.key}';onKeyInput('${cfg.key}');"
+        style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer;padding:2px 8px;font-size:10px;font-family:inherit;">
+        Editar
+      </button>
+      <button onclick="_setActiveProvider('${id}')"
+        style="background:${isActive?'rgba(0,229,255,.15)':'var(--bg4)'};border:1px solid ${isActive?'var(--accent)':'var(--border2)'};border-radius:4px;color:${isActive?'var(--accent)':'var(--text2)'};cursor:pointer;padding:2px 8px;font-size:10px;font-family:inherit;">
+        ${isActive?'✓ Ativo':'Usar'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function _setActiveProvider(provId) {
+  if (!_providerConfigs[provId]?.key) return;
+  _activeProvider = provId;
+  localStorage.setItem('kaezar_active_provider', provId);
+  apiKey  = _providerConfigs[provId].key;
+  aiModel = _providerConfigs[provId].model || AI_PROVIDERS[provId].models[0].id;
+  document.getElementById('ai-status').textContent = '✓ Conectado';
+  _renderSavedProviders();
+  log(`🔑 Provider ativo: ${AI_PROVIDERS[provId].name}`, 'info');
+}
+
+// ── UNIVERSAL AI CALL — routes to correct provider ──
+async function _callAI(systemPrompt, messages, maxTokens) {
+  if (!apiKey) throw new Error('API Key não configurada');
+  const prov = AI_PROVIDERS[_activeProvider];
+  if (!prov) throw new Error('Provider inválido');
+  return prov.call(systemPrompt, messages, maxTokens);
+}
+
+// ── Anthropic ──
+async function _callAnthropic(systemPrompt, messages, maxTokens) {
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body: JSON.stringify({ model:aiModel, max_tokens:maxTokens, system:systemPrompt, messages })
+  });
+  const d = await resp.json();
+  if (d.error) throw new Error(d.error.message);
+  return { text: d.content[0].text, usage: d.usage };
+}
+
+// ── OpenAI ──
+async function _callOpenAI(systemPrompt, messages, maxTokens) {
+  const msgs = [{ role:'system', content:systemPrompt }, ...messages];
+  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+apiKey },
+    body: JSON.stringify({ model:aiModel, max_tokens:maxTokens, messages:msgs })
+  });
+  const d = await resp.json();
+  if (d.error) throw new Error(d.error.message);
+  return { text: d.choices[0].message.content, usage: d.usage };
+}
+
+// ── Google Gemini ──
+async function _callGemini(systemPrompt, messages, maxTokens) {
+  const contents = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts:[{ text: m.content }]
+  }));
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${aiModel}:generateContent?key=${apiKey}`,
+    {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        system_instruction:{ parts:[{ text:systemPrompt }] },
+        contents,
+        generationConfig:{ maxOutputTokens:maxTokens }
+      })
+    }
+  );
+  const d = await resp.json();
+  if (d.error) throw new Error(d.error.message);
+  return { text: d.candidates[0].content.parts[0].text, usage: {} };
+}
+
+// ── PROXY helper ──
+// Providers sem CORS nativo precisam do kaezar-proxy.js rodando (local ou Render)
+// Configurável: localStorage kaezar_proxy_url
+
+async function _checkProxy() {
+  try {
+    const r = await fetch(PROXY_URL + '/health', { signal: AbortSignal.timeout(2500) });
+    _proxyOnline = r.ok;
+  } catch { _proxyOnline = false; }
+  _updateProxyBadge();
+  return _proxyOnline;
+}
+
+function _updateProxyBadge() {
+  const el = document.getElementById('proxy-status-badge');
+  if (!el) return;
+  const isCorsNative = (typeof AI_PROVIDERS !== 'undefined') && AI_PROVIDERS[_modalProvider]?.cors;
+  if (isCorsNative) {
+    el.innerHTML = '✅ CORS nativo — funciona no mobile';
+    el.style.color = 'var(--green)';
+    return;
+  }
+  if (_proxyOnline) {
+    el.innerHTML = `🟢 Proxy ativo (${PROXY_URL.replace('http://','')})`;
+    el.style.color = 'var(--green)';
+  } else {
+    el.innerHTML = '🔴 Proxy offline — <a href="#" onclick="openProxyHelp();return false;" style="color:var(--accent);">como resolver?</a>';
+    el.style.color = 'var(--red)';
+  }
+}
+
+function openProxyHelp() {
+  const msg = `Este provider não tem CORS nativo.\n\nOPÇÃO 1 — USE OPENROUTER (mais fácil, grátis)\nopenrouter.ai → crie conta → API Keys → gera key\nModelos DeepSeek R1, Qwen3, Llama4, Gemini são grátis!\n\nOPÇÃO 2 — PROXY LOCAL (PC)\n1. Instale Node.js (nodejs.org)\n2. Coloque kaezar-proxy.js na mesma pasta do HTML\n3. Execute: node kaezar-proxy.js\n\nOPÇÃO 3 — PROXY NUVEM (mobile/PC)\n1. Crie conta em render.com\n2. New → Web Service → Deploy from GitHub\n3. Suba kaezar-proxy.js como repositório\n4. Configure a URL do proxy no campo abaixo\n\nVer README-proxy.txt para instruções detalhadas.`;
+  alert(msg);
+}
+
+// Permite configurar URL do proxy (para Render ou outro serviço)
+function saveProxyUrl() {
+  const inp = document.getElementById('proxy-url-input');
+  if (!inp) return;
+  PROXY_URL = inp.value.trim().replace(/\/$/, '') || 'http://localhost:3131';
+  localStorage.setItem('kaezar_proxy_url', PROXY_URL);
+  _checkProxy();
+}
+
+async function _proxyFetch(targetUrl, headers, body) {
+  if (!_proxyOnline) await _checkProxy();
+  if (!_proxyOnline) throw new Error(`Proxy CORS offline.\n\nUse OpenRouter (grátis, sem proxy) ou inicie o proxy:\n• Local: node kaezar-proxy.js\n• Nuvem: configure a URL do proxy nas configurações de API.`);
+  const url = `${PROXY_URL}/proxy?url=${encodeURIComponent(targetUrl)}`;
+  const resp = await fetch(url, { method:'POST', headers, body });
+  return resp.json();
+}
+
+async function _openAICompat(endpoint, systemPrompt, messages, maxTokens, extraHeaders={}) {
+  const msgs = [{ role:'system', content:systemPrompt }, ...messages];
+  const headers = { 'Content-Type':'application/json', 'Authorization':'Bearer '+apiKey, ...extraHeaders };
+  const bodyStr = JSON.stringify({ model:aiModel, max_tokens:maxTokens, messages:msgs });
+  const d = await _proxyFetch(endpoint, headers, bodyStr);
+  if (d.error) throw new Error(d.error.message || JSON.stringify(d.error));
+  return { text: d.choices[0].message.content, usage: d.usage };
+}
+
+// ── OpenRouter (CORS nativo ✅ — sem proxy) ──
+async function _callOpenRouter(systemPrompt, messages, maxTokens) {
+  const msgs = [{ role:'system', content:systemPrompt }, ...messages];
+  const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer '+apiKey,
+      'HTTP-Referer':'https://kaezarengine.app',
+      'X-Title':'KaezarEngine'
+    },
+    body: JSON.stringify({ model:aiModel, max_tokens:maxTokens, messages:msgs })
+  });
+  const d = await resp.json();
+  if (d.error) throw new Error(d.error.message || JSON.stringify(d.error));
+  return { text: d.choices[0].message.content, usage: d.usage };
+}
+
+// ── OpenAI (requer proxy) ──
+async function _callOpenAI(systemPrompt, messages, maxTokens) {
+  return _openAICompat('https://api.openai.com/v1/chat/completions', systemPrompt, messages, maxTokens);
+}
+
+// ── Groq (requer proxy) ──
+async function _callGroq(systemPrompt, messages, maxTokens) {
+  return _openAICompat('https://api.groq.com/openai/v1/chat/completions', systemPrompt, messages, maxTokens);
+}
+
+// ── Mistral (requer proxy) ──
+async function _callMistral(systemPrompt, messages, maxTokens) {
+  return _openAICompat('https://api.mistral.ai/v1/chat/completions', systemPrompt, messages, maxTokens);
+}
+
+// ── DeepSeek (requer proxy) ──
+// ── Puter.js Login ──
+async function puterDoLogin() {
+  const btn = document.getElementById('puter-login-btn');
+  const status = document.getElementById('puter-login-status');
+  if (typeof puter === 'undefined') {
+    if(status) status.innerHTML = '❌ Puter.js não carregou. Verifique sua conexão.';
+    return;
+  }
+  try {
+    btn.textContent = '⏳ Abrindo login...';
+    btn.disabled = true;
+    await puter.auth.signIn();
+    const user = await puter.auth.getUser();
+    if(status) status.innerHTML = `✅ Logado como <b>${user.username}</b>`;
+    btn.textContent = '✅ Conectado!';
+    btn.style.background = 'linear-gradient(135deg,var(--green),#00c853)';
+    btn.style.color = '#001a04';
+    log('⚡ Puter.js conectado como ' + user.username, 'info');
+
+    // Ativar Puter automaticamente como provider ativo
+    const model = document.getElementById('ai-model-select')?.value || AI_PROVIDERS.puter.models[0].id;
+    if (!_providerConfigs['puter']) _providerConfigs['puter'] = {};
+    _providerConfigs['puter'].model = model;
+    _providerConfigs['puter'].key = '';
+    localStorage.setItem('kaezar_providers', JSON.stringify(_providerConfigs));
+    _activeProvider = 'puter';
+    localStorage.setItem('kaezar_active_provider', 'puter');
+    apiKey = '';
+    aiModel = model;
+    document.getElementById('ai-status').textContent = '✓ Conectado';
+    _renderSavedProviders();
+    log(`⚡ Puter.js ativado! Modelo: ${model}`, 'info');
+  } catch(e) {
+    btn.textContent = '⚡ Entrar com Puter (grátis)';
+    btn.disabled = false;
+    if(status) status.innerHTML = '⚠️ Login cancelado ou popup bloqueado.<br>Permita popups para este site.';
+  }
+}
+
+// Verificar status Puter ao abrir modal
+function puterCheckStatus() {
+  const status = document.getElementById('puter-login-status');
+  const btn = document.getElementById('puter-login-btn');
+  if (!status || typeof puter === 'undefined') return;
+  if (puter.auth.isSignedIn()) {
+    puter.auth.getUser().then(u => {
+      status.innerHTML = `✅ Logado como <b>${u.username}</b>`;
+      if(btn) { btn.textContent = '✅ Reconectar'; btn.style.background = 'linear-gradient(135deg,var(--green),#00c853)'; btn.style.color='#001a04'; }
+    });
+  } else {
+    status.innerHTML = '🔴 Não logado — clique abaixo para entrar';
+  }
+}
+async function _callPuter(systemPrompt, messages, maxTokens) {
+  if (typeof puter === 'undefined') throw new Error('Puter.js não carregou. Verifique sua conexão.');
+
+  // Se não está logado, tenta login (deve ser chamado por gesto do usuário)
+  if (!puter.auth.isSignedIn()) {
+    try {
+      await puter.auth.signIn();
+    } catch(e) {
+      throw new Error('Login Puter cancelado ou bloqueado. Use o botão "Login Puter" nas configurações de API.');
+    }
+  }
+
+  const msgs = [
+    { role: 'system', content: systemPrompt },
+    ...messages
+  ];
+  const resp = await puter.ai.chat(msgs, { model: aiModel, max_tokens: maxTokens });
+  const text = resp?.message?.content?.[0]?.text || resp?.message?.content || String(resp);
+  return { text, usage: { total_tokens: resp?.usage?.total_tokens || '?' } };
+}
+
+async function _callDeepSeek(systemPrompt, messages, maxTokens) {
+  return _openAICompat('https://api.deepseek.com/v1/chat/completions', systemPrompt, messages, maxTokens);
+}
+
+// ── Qwen (requer proxy) ──
+async function _callQwen(systemPrompt, messages, maxTokens) {
+  // Tenta endpoint moderno primeiro, fallback para o antigo
+  const endpoint = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+  return _openAICompat(endpoint, systemPrompt, messages, maxTokens);
+}
+
+// ── Google Gemini (CORS nativo ✅ — sem proxy) ──
+async function _callGemini(systemPrompt, messages, maxTokens) {
+  const contents = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts:[{ text: m.content }]
+  }));
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${aiModel}:generateContent?key=${apiKey}`;
+  const headers = { 'Content-Type':'application/json' };
+  const bodyStr = JSON.stringify({
+    system_instruction:{ parts:[{ text:systemPrompt }] },
+    contents,
+    generationConfig:{ maxOutputTokens:maxTokens }
+  });
+  const resp = await fetch(endpoint, { method:'POST', headers, body: bodyStr });
+  const d = await resp.json();
+  if (d.error) throw new Error(d.error.message);
+  return { text: d.candidates[0].content.parts[0].text, usage: {} };
+}
+
+// Verificar proxy ao carregar (só se provider ativo precisar)
+setTimeout(() => { if (!AI_PROVIDERS[_activeProvider]?.cors) _checkProxy(); }, 900);
+
+function showCtx(x,y) { const m=document.getElementById('ctx-menu'); m.style.display='block'; m.style.left=x+'px'; m.style.top=y+'px'; }
+function hideCtx() { document.getElementById('ctx-menu').style.display='none'; }
+
+// ── PANEL SWITCHES ──
+function switchLeftTab(btn, tabId) {
+  document.querySelectorAll('#left-panel .panel-tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('hierarchy-tab').style.display = tabId==='hierarchy-tab' ? 'flex' : 'none';
+  document.getElementById('project-tab').style.display = tabId==='project-tab' ? 'block' : 'none';
+}
+function switchRightTab(btn, tabId) {
+  document.querySelectorAll('#right-panel .panel-tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('inspector-tab').style.display = tabId==='inspector-tab' ? 'flex' : 'none';
+  document.getElementById('layers-tab').style.display = tabId==='layers-tab' ? 'block' : 'none';
+}
+function switchBtmTab(btn, panelId) {
+  document.querySelectorAll('.btm-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#bottom-panel > div[id$="-panel"]').forEach(p=>p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+}
+function switchVPTab(btn, mode) {
+  vpMode = mode;
+  document.querySelectorAll('.vp-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if (mode==='3d') setEngineMode('3d');
+  else setEngineMode('2d');
+}
+
+// ── PANEL RESIZE ──
+function startResize(e, panelId, handleId, side='left') {
+  e.preventDefault();
+  const panel = document.getElementById(panelId);
+  const startX = e.clientX;
+  const startW = panel.offsetWidth;
+  const onMove = ev => { const dx=ev.clientX-startX; const nw=side==='right'?startW-dx:startW+dx; panel.style.width=Math.max(160,Math.min(500,nw))+'px'; };
+  const onUp = () => { document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); };
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onUp);
+}
+function startResizeV(e) {
+  e.preventDefault();
+  const bottom = document.getElementById('bottom-panel');
+  const startY = e.clientY, startH = bottom.offsetHeight;
+  const onMove = ev => { const dy=ev.clientY-startY; bottom.style.height=Math.max(80,Math.min(400,startH-dy))+'px'; };
+  const onUp = () => { document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); };
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onUp);
+}
+
+// ── CONSOLE ──
+function log(msg, type='log') {
+  const el = document.getElementById('console-lines');
+  const time = new Date().toLocaleTimeString('pt-BR',{hour12:false});
+  const line = document.createElement('div');
+  line.className=`console-line ${type}`;
+  const icons={log:'›',warn:'⚠',error:'✕',info:'ℹ'};
+  line.innerHTML=`<span class="console-time">${time}</span><span>${icons[type]||'›'} ${msg}</span>`;
+  el.appendChild(line);
+  el.scrollTop=el.scrollHeight;
+}
+function clearConsole() { document.getElementById('console-lines').innerHTML=''; }
+
+// ── SCENE SAVE / LOAD ──
+function saveScene() {
+  const data = entities.map(e => { const c=JSON.parse(JSON.stringify(e)); c._mesh=null; c._runtime={}; return c; });
+  const json = JSON.stringify({ sceneName, entities: data, EID }, null, 2);
+  const a = document.createElement('a');
+  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
+  a.download = sceneName.replace(/\s/g,'_') + '.kaezar';
+  a.click();
+  log('💾 Cena salva!', 'info');
+}
+
+function loadScene() {
+  const input = document.createElement('input');
+  input.type='file'; input.accept='.kaezar,.json';
+  input.onchange = ev => {
+    const file = ev.target.files[0];
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (three) entities.forEach(ent=>{if(ent._mesh)three.scene.remove(ent._mesh);});
+        entities = data.entities.map(d => {
+          const ent = Object.assign(new Entity(''), d);
+          ent._mesh=null; ent._runtime={};
+          if (ent.dim==='3d' && ent.components.mesh3d) buildMesh(ent);
+          if (ent.dim==='3d' && ent.components.light3d) buildLight3D(ent);
+          return ent;
+        });
+        EID = data.EID || entities.length;
+        sceneName = data.sceneName||'Cena';
+        document.getElementById('scene-name-status').textContent = sceneName;
+        refreshHierarchy(); refreshInspector();
+        log('📂 Cena carregada!', 'info');
+      } catch(err) { log('Erro ao carregar cena: ' + err.message, 'error'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function exportGame() {
+  log('📦 Exportando jogo...', 'info');
+  setTimeout(() => log('Use Arquivo > Salvar para exportar cenas. Exportação completa em breve.', 'warn'), 500);
+}
+
+function newScene() {
+  if (!confirm('Criar nova cena? Dados não salvos serão perdidos.')) return;
+  if (three) entities.forEach(e=>{if(e._mesh)three.scene.remove(e._mesh);});
+  entities=[];selectedId=null;EID=0;
+  refreshHierarchy(); refreshInspector();
+  log('📄 Nova cena criada', 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  AI AGENT — CLAUDE INTEGRATION
+// ═══════════════════════════════════════════════════════════════
+
+let aiConversationHistory = [];
+
+function toggleAIPanel() {
+  const panel = document.getElementById('ai-panel');
+  panel.classList.toggle('hidden');
+  const isOpen = !panel.classList.contains('hidden');
+  // Hide mobile nav when AI panel is open so it doesn't cover the input
+  const nav = document.getElementById('mob-panel-nav');
+  if (nav) nav.classList.toggle('ai-open', isOpen);
+  if (isOpen && aiConversationHistory.length === 0) {
+    addAIMessage('ai', '👋 Olá! Sou o Agente IA da KaezarEngine. Descreva o que quer criar e vou gerar o código para você.\n\nExemplos:\n• "Crie um player que se move com WASD e pula com espaço"\n• "Adicione um inimigo que persegue o player"\n• "Crie um cubo 3D que rotaciona"\n• "Faça um sistema de pontuação"');
+  }
+  setTimeout(() => document.getElementById('ai-input').focus(), 120);
+}
+
+function addAIMessage(role, text, code) {
+  const el = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${role}`;
+  const avatar = role==='ai' ? '🤖' : '👤';
+  let html = `<div class="avatar">${avatar}</div><div class="bubble">`;
+  // Format: detect code blocks
+  const formatted = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+    `<pre style="background:var(--bg0);border:1px solid var(--border2);border-radius:4px;padding:8px;font-size:10px;overflow-x:auto;margin:6px 0;color:var(--accent3);line-height:1.6;">${code.trim().replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`
+  ).replace(/\n/g,'<br>');
+  html += formatted;
+  if (code) {
+    html += `<div><button class="apply-code-btn" onclick="applyGeneratedScript(${JSON.stringify(code).replace(/"/g,'&quot;')})">▶ Aplicar ao Objeto Selecionado</button></div>`;
+  }
+  html += '</div>';
+  div.innerHTML = html;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function showTyping() {
+  const el = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ai';
+  div.id = 'ai-typing-indicator';
+  div.innerHTML = `<div class="avatar">🤖</div><div class="bubble"><div class="ai-typing"><span></span><span></span><span></span></div></div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('ai-typing-indicator');
+  if (t) t.remove();
+}
+
+function applyGeneratedScript(code) {
+  const e = entities.find(e=>e.id===selectedId);
+  if (!e) {
+    log('⚠ Selecione um objeto primeiro para aplicar o script', 'warn');
+    return;
+  }
+  e.script = code;
+  refreshInspector();
+  log(`✅ Script da IA aplicado a: ${e.name}`, 'info');
+}
+
+async function sendAIMessage() {
+  const input = document.getElementById('ai-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  if (!apiKey) {
+    addAIMessage('ai', '⚠️ Configure sua **API Key** primeiro! Clique no ícone 🔑 no menu superior ou vá em **AI Agent > Configurar Key**.');
+    return;
+  }
+
+  input.value = '';
+  addAIMessage('user', msg);
+  document.getElementById('ai-send').disabled = true;
+  showTyping();
+
+  // Build scene context
+  const sceneCtx = entities.length ? entities.map(e =>
+    `- ${e.name} [${e.type}/${e.dim}] pos=(${e.components.transform.x.toFixed(1)},${e.components.transform.y.toFixed(1)}) script=${e.script?'sim':'não'}`
+  ).join('\n') : 'Cena vazia';
+
+  const selectedEnt = entities.find(e=>e.id===selectedId);
+  const selectedCtx = selectedEnt ? `Objeto selecionado: ${selectedEnt.name} [${selectedEnt.type}]` : 'Nenhum objeto selecionado';
+
+  aiConversationHistory.push({ role:'user', content: msg });
+
+  const systemPrompt = `Você é o Agente IA da KaezarEngine v2.0, uma game engine browser-based que suporta jogos 2D (Canvas) e 3D (Three.js r128).
+
+ENGINE CONTEXT:
+- Scripts usam funções Start() e Update(dt) onde dt é delta time em segundos
+- Para 2D: this.components.transform.x/y, this.components.renderer.color/w/h/r
+- Rigidbody 2D: this.components.rigidbody2d.vx/vy
+- Input: Input.getKey('ArrowRight'), Input.getKey('w'), etc.
+- Para 3D: Three.js mesh em this._mesh, position/rotation/scale
+- O script é executado com "with(this){...}" então pode referenciar this diretamente
+
+CENA ATUAL:
+${sceneCtx}
+${selectedCtx}
+
+REGRAS:
+1. Seja direto e prático
+2. Ao gerar scripts, sempre use funções Start() e Update(dt)
+3. Coloque código em blocos \`\`\`javascript ... \`\`\`
+4. Após o código, explique brevemente o que foi criado
+5. Se precisar criar múltiplos objetos, descreva cada script separadamente
+6. Responda em Português (Brasil)`;
+
+  try {
+    const result = await _callAI(systemPrompt, aiConversationHistory, 2000);
+    const aiText = result.text;
+    aiConversationHistory.push({ role:'assistant', content: aiText });
+
+    // Extract first JS code block for "Apply" button
+    const codeMatch = aiText.match(/```(?:javascript|js)\n?([\s\S]*?)```/);
+    const extractedCode = codeMatch ? codeMatch[1].trim() : null;
+
+    removeTyping();
+    addAIMessage('ai', aiText, extractedCode);
+    log(`🤖 ${AI_PROVIDERS[_activeProvider]?.name||'AI'} respondeu (${result.usage?.total_tokens||result.usage?.output_tokens||'?'} tokens)`, 'info');
+  } catch(err) {
+    removeTyping();
+    addAIMessage('ai', `❌ Erro: ${err.message}\n\nVerifique sua API Key e conexão.`);
+    log(`AI Error: ${err.message}`, 'error');
+  }
+
+  document.getElementById('ai-send').disabled = false;
+  document.getElementById('ai-input').focus();
+}
+
+// ── INIT ──
+window.addEventListener('resize', () => { resizeCanvas(); resizeThree(); });
+resizeCanvas();
+
+// Demo scene
+setTimeout(() => {
+  // 2D Objects
+  const bg = createEntity2D('Rect'); bg.name='Background';
+  bg.components.renderer.w=500; bg.components.renderer.h=350; bg.components.renderer.color='#0a0d20';
+
+  const player = createEntity2D('Rect'); player.name='Player';
+  player.components.transform.x=-80; player.components.transform.y=60;
+  player.components.renderer.color='#00e5ff';
+  player.components.renderer.w=40; player.components.renderer.h=40;
+  player.components.rigidbody2d={mass:1,gravityScale:0,isKinematic:false,vx:0,vy:0};
+  player.script=`function Start(){this.speed=150;}
+function Update(dt){
+  const t=this.components.transform;
+  if(Input.getKey('ArrowRight')||Input.getKey('d')) t.x+=this.speed*dt;
+  if(Input.getKey('ArrowLeft')||Input.getKey('a')) t.x-=this.speed*dt;
+  if(Input.getKey('ArrowUp')||Input.getKey('w')) t.y-=this.speed*dt;
+  if(Input.getKey('ArrowDown')||Input.getKey('s')) t.y+=this.speed*dt;
+}`;
+
+  const enemy = createEntity2D('Circle'); enemy.name='Inimigo';
+  enemy.components.transform.x=100; enemy.components.transform.y=30;
+  enemy.components.renderer.color='#ff4081'; enemy.components.renderer.r=22;
+
+  const hud = createEntity2D('Text'); hud.name='HUD';
+  hud.components.transform.y=-130;
+  hud.components.renderer.text='KaezarEngine v2.0 — 2D + 3D + AI';
+  hud.components.renderer.color='#00e5ff'; hud.components.renderer.font='bold 13px Oxanium,sans-serif';
+
+  selectEntity(player.id);
+  log('🚀 KaezarEngine v2.0 iniciado! 2D + 3D + AI Agent ativo.', 'info');
+  log('💡 Clique em ⚡ AI AGENT para gerar código com IA.', 'info');
+  log('💡 Configure sua API Key no ícone 🔑 para ativar o agente.', 'info');
+  log('💡 Mude para modo 3D e crie cubos, esferas e mais!', 'info');
+}, 100);
+
+requestAnimationFrame(mainLoop);
+
+// ═══════════════════════════════════════════════════════════════
+//  MOBILE SUPPORT — KaezarEngine v2 Mobile
+// ═══════════════════════════════════════════════════════════════
+
+const isMobile = () => window.innerWidth <= 768;
+
+// ── HAMBURGER MENU ──
+function toggleMobMenu() {
+  const menu = document.getElementById('mob-hamburger-menu');
+  menu.classList.toggle('open');
+}
+function closeMobMenu() {
+  document.getElementById('mob-hamburger-menu').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#mob-hamburger-menu') && !e.target.closest('#mobile-hamburger')) {
+    closeMobMenu();
+  }
+});
+
+// ── DRAWER PANELS ──
+function mobTogglePanel(side) {
+  if (!isMobile()) return;
+  const left = document.getElementById('left-panel');
+  const right = document.getElementById('right-panel');
+  const overlay = document.getElementById('mob-overlay');
+  const navHier = document.getElementById('mob-nav-hier');
+  const navInsp = document.getElementById('mob-nav-insp');
+
+  if (side === 'left') {
+    const isOpen = left.classList.contains('mob-open');
+    // close both first
+    left.classList.remove('mob-open');
+    right.classList.remove('mob-open');
+    navHier.classList.remove('active');
+    navInsp.classList.remove('active');
+    if (!isOpen) {
+      left.classList.add('mob-open');
+      navHier.classList.add('active');
+      overlay.classList.add('show');
+    } else {
+      overlay.classList.remove('show');
+    }
+  } else {
+    const isOpen = right.classList.contains('mob-open');
+    left.classList.remove('mob-open');
+    right.classList.remove('mob-open');
+    navHier.classList.remove('active');
+    navInsp.classList.remove('active');
+    if (!isOpen) {
+      right.classList.add('mob-open');
+      navInsp.classList.add('active');
+      overlay.classList.add('show');
+    } else {
+      overlay.classList.remove('show');
+    }
+  }
+}
+
+function closeMobDrawers() {
+  document.getElementById('left-panel').classList.remove('mob-open');
+  document.getElementById('right-panel').classList.remove('mob-open');
+  document.getElementById('mob-overlay').classList.remove('show');
+  document.getElementById('mob-nav-hier').classList.remove('active');
+  document.getElementById('mob-nav-insp').classList.remove('active');
+}
+
+function mobFocusViewport() {
+  closeMobDrawers();
+  // Show brief touch hint
+  const existing = document.querySelector('.touch-hint');
+  if (existing) existing.remove();
+  const hint = document.createElement('div');
+  hint.className = 'touch-hint';
+  hint.textContent = '1 dedo = arrastar objeto · 2 dedos = zoom/pan';
+  document.getElementById('canvas-wrap').appendChild(hint);
+  setTimeout(() => hint.remove(), 3000);
+}
+
+// ── BOTTOM PANEL PULL ──
+function toggleBottomPanel() {
+  const bp = document.getElementById('bottom-panel');
+  bp.classList.toggle('mob-expanded');
+}
+
+// ── INIT MOBILE LAYOUT ──
+let _mobileLayoutActivated = false;
+function initMobileLayout() {
+  if (!isMobile()) return;
+  if (_mobileLayoutActivated) return;
+  _mobileLayoutActivated = true;
+  // Show pull tab and nav bar
+  document.getElementById('mob-pull-tab').style.display = 'flex';
+  document.getElementById('mob-panel-nav').style.display = 'flex';
+  document.getElementById('mobile-hamburger').style.display = 'flex';
+  // Initially collapse bottom panel to tabs only
+  document.getElementById('bottom-panel').classList.remove('mob-expanded');
+  log('📱 Modo mobile ativado. Use os botões na barra inferior para navegar.', 'info');
+}
+
+window.addEventListener('resize', () => {
+  if (isMobile()) {
+    initMobileLayout();
+  } else {
+    // Restore desktop: remove mobile classes
+    document.getElementById('left-panel').classList.remove('mob-open');
+    document.getElementById('right-panel').classList.remove('mob-open');
+    document.getElementById('mob-overlay').classList.remove('show');
+    document.getElementById('mob-pull-tab').style.display = 'none';
+    document.getElementById('mob-panel-nav').style.display = 'none';
+  }
+  resizeCanvas();
+  resizeThree();
+});
+
+// ── TOUCH: 2D CANVAS — 1 dedo arrasta objeto / pan vazio, 2 dedos zoom+pan ──
+(function setupTouch2D() {
+  let touchDragEntity = null;
+  let touchDragStart = null;
+  // For single-finger pan (no entity hit)
+  let panStart = null;
+  let camAtPanStart = null;
+  // For two-finger pinch/pan
+  let lastPinchDist = null;
+  let lastMidScreen = null;  // { x, y } in screen pixels
+
+  function getTouchScreen(touch) {
+    const rect = canvas2d.getBoundingClientRect();
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  }
+
+  canvas2d.addEventListener('touchstart', e => {
+    e.preventDefault();
+    touchDragEntity = null;
+    touchDragStart = null;
+    panStart = null;
+    camAtPanStart = null;
+    lastPinchDist = null;
+    lastMidScreen = null;
+
+    if (e.touches.length === 1) {
+      const pos = getTouchScreen(e.touches[0]);
+      const w = screenToWorld(pos.x, pos.y);
+      // Pick entity
+      let hit = null;
+      for (let i = entities.length - 1; i >= 0; i--) {
+        const ent = entities[i];
+        if (!ent.visible || ent.dim !== '2d') continue;
+        const t = ent.components.transform;
+        const r = ent.components.renderer;
+        if (!r) continue;
+        if (r.type === 'rect') {
+          if (Math.abs(w.x - t.x) < r.w / 2 && Math.abs(w.y - t.y) < r.h / 2) { hit = ent; break; }
+        } else if (r.type === 'circle') {
+          const dx = w.x - t.x, dy = w.y - t.y;
+          if (Math.sqrt(dx*dx + dy*dy) < r.r) { hit = ent; break; }
+        } else {
+          if (Math.abs(w.x - t.x) < 40 && Math.abs(w.y - t.y) < 30) { hit = ent; break; }
+        }
+      }
+      if (hit) {
+        selectEntity(hit.id);
+        touchDragEntity = hit;
+        touchDragStart = { wx: w.x, wy: w.y, ex: hit.components.transform.x, ey: hit.components.transform.y };
+      } else {
+        // Pan mode: record start in screen pixels + camera state
+        panStart = pos;
+        camAtPanStart = { x: cam.x, y: cam.y };
+        selectEntity(null);
+      }
+    } else if (e.touches.length === 2) {
+      touchDragEntity = null;
+      panStart = null;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      lastPinchDist = Math.sqrt(dx*dx + dy*dy);
+      lastMidScreen = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+      };
+    }
+  }, { passive: false });
+
+  canvas2d.addEventListener('touchmove', e => {
+    e.preventDefault();
+
+    if (e.touches.length === 1) {
+      const pos = getTouchScreen(e.touches[0]);
+      const w = screenToWorld(pos.x, pos.y);
+      document.getElementById('mouse-world').textContent = `${w.x.toFixed(1)}, ${w.y.toFixed(1)}`;
+
+      if (touchDragEntity && touchDragStart) {
+        // Move entity: delta in world space from drag origin
+        const dx = w.x - touchDragStart.wx;
+        const dy = w.y - touchDragStart.wy;
+        let nx = touchDragStart.ex + dx;
+        let ny = touchDragStart.ey + dy;
+        if (snapEnabled) { nx = Math.round(nx / gridSize) * gridSize; ny = Math.round(ny / gridSize) * gridSize; }
+        touchDragEntity.components.transform.x = nx;
+        touchDragEntity.components.transform.y = ny;
+        if (touchDragEntity._mesh) touchDragEntity._mesh.position.set(nx, ny, touchDragEntity.components.transform.z || 0);
+        refreshInspector();
+      } else if (panStart && camAtPanStart) {
+        // Pan viewport: delta in screen pixels → world units
+        const dxScreen = pos.x - panStart.x;
+        const dyScreen = pos.y - panStart.y;
+        cam.x = camAtPanStart.x + dxScreen / cam.zoom;
+        cam.y = camAtPanStart.y + dyScreen / cam.zoom;
+      }
+
+    } else if (e.touches.length === 2) {
+      const t0 = e.touches[0], t1 = e.touches[1];
+      const dx = t0.clientX - t1.clientX;
+      const dy = t0.clientY - t1.clientY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const midX = (t0.clientX + t1.clientX) / 2;
+      const midY = (t0.clientY + t1.clientY) / 2;
+
+      // Pinch zoom
+      if (lastPinchDist !== null) {
+        const scale = dist / lastPinchDist;
+        cam.zoom = Math.max(0.1, Math.min(10, cam.zoom * scale));
+      }
+      // Two-finger pan
+      if (lastMidScreen !== null) {
+        const dmx = midX - lastMidScreen.x;
+        const dmy = midY - lastMidScreen.y;
+        cam.x += dmx / cam.zoom;
+        cam.y += dmy / cam.zoom;
+      }
+
+      lastPinchDist = dist;
+      lastMidScreen = { x: midX, y: midY };
+    }
+  }, { passive: false });
+
+  canvas2d.addEventListener('touchend', e => {
+    e.preventDefault();
+    if (e.touches.length === 0) {
+      touchDragEntity = null;
+      touchDragStart = null;
+      panStart = null;
+      camAtPanStart = null;
+      lastPinchDist = null;
+      lastMidScreen = null;
+    }
+  }, { passive: false });
+})();
+
+// ── LONG PRESS CONTEXT MENU (mobile) ──
+(function setupLongPress() {
+  let lpTimer = null;
+  canvas2d.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    lpTimer = setTimeout(() => {
+      const t = e.touches[0];
+      showCtx(t.clientX, t.clientY);
+    }, 650);
+  }, { passive: true });
+  canvas2d.addEventListener('touchend', () => clearTimeout(lpTimer));
+  canvas2d.addEventListener('touchmove', () => clearTimeout(lpTimer));
+})();
+
+// ── RUN INIT ──
+initMobileLayout();
+
+// ═══════════════════════════════════════════════════════════════
+//  DEBUG ENGINE — Agente IA que corrige a arquitetura do app
+// ═══════════════════════════════════════════════════════════════
+
+// ── Error capture: intercepta console.error/warn reais ──
+const _dbgErrors   = [];  // { type, msg, stack, time }
+const _dbgHistory  = [];  // conversa do debug agent
+let   _dbgPatch    = null; // { code, summary } patch pendente
+const DBG_MAX_ERRORS = 40;
+
+(function interceptConsole() {
+  const _origError = console.error.bind(console);
+  const _origWarn  = console.warn.bind(console);
+  console.error = (...args) => {
+    _dbgPushError('error', args.join(' '));
+    _origError(...args);
+  };
+  console.warn = (...args) => {
+    _dbgPushError('warn', args.join(' '));
+    _origWarn(...args);
+  };
+  window.addEventListener('error', ev => {
+    _dbgPushError('error', `${ev.message} @ ${ev.filename}:${ev.lineno}:${ev.colno}`, ev.error?.stack);
+  });
+  window.addEventListener('unhandledrejection', ev => {
+    _dbgPushError('error', `Promise: ${ev.reason}`, ev.reason?.stack);
+  });
+})();
+
+function _dbgPushError(type, msg, stack) {
+  _dbgErrors.push({ type, msg, stack: stack || '', time: new Date().toLocaleTimeString('pt-BR', { hour12: false }) });
+  if (_dbgErrors.length > DBG_MAX_ERRORS) _dbgErrors.shift();
+  _dbgRefreshErrorBar();
+}
+
+function _dbgRefreshErrorBar() {
+  const errs  = _dbgErrors.filter(e => e.type === 'error').length;
+  const warns = _dbgErrors.filter(e => e.type === 'warn').length;
+  const ec = document.getElementById('dbg-error-count');
+  const wc = document.getElementById('dbg-warn-count');
+  if (ec) ec.textContent = errs;
+  if (wc) wc.textContent = warns;
+}
+
+// ── Open / helpers ──
+function openDebugEngine() {
+  _dbgRefreshErrorBar();
+  openModal('debug-modal');
+  if (_dbgHistory.length === 0) {
+    _dbgAddMsg('agent', `🔬 **Debug Agent ativo.**\n\nPosso analisar erros do console, inspecionar o código da engine e gerar patches corrigidos.\n\nDescreva o problema ou clique em **⚡ ANALISAR** para eu examinar os erros capturados automaticamente.`);
+  }
+  setTimeout(() => document.getElementById('dbg-input')?.focus(), 150);
+}
+
+function dbgClearHistory() {
+  _dbgHistory.length = 0;
+  _dbgErrors.length  = 0;
+  _dbgPatch = null;
+  const el = document.getElementById('dbg-messages');
+  if (el) el.innerHTML = '';
+  document.getElementById('dbg-patch-area').style.display = 'none';
+  _dbgRefreshErrorBar();
+  log('🗑 Histórico de debug limpo', 'info');
+}
+
+function _dbgSetStatus(label, color) {
+  const dot = document.getElementById('dbg-status-dot');
+  const lbl = document.getElementById('dbg-status-label');
+  if (dot) dot.style.background = color;
+  if (lbl) lbl.textContent = label;
+}
+
+function _dbgAddMsg(role, text) {
+  const el = document.getElementById('dbg-messages');
+  if (!el) return;
+  const div = document.createElement('div');
+  div.style.cssText = `display:flex;gap:8px;align-items:flex-start;`;
+  const isAgent = role === 'agent';
+  const avatar  = isAgent ? '🔬' : '👤';
+  const avatarBg = isAgent ? 'rgba(255,107,53,.15)' : 'rgba(124,77,255,.15)';
+  const avatarBorder = isAgent ? 'rgba(255,107,53,.4)' : 'rgba(124,77,255,.4)';
+
+  // Format: bold **x**, code blocks, newlines
+  let html = text
+    .replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+      `<pre style="background:var(--bg0);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:10px;overflow-x:auto;margin:6px 0;color:var(--accent3);line-height:1.6;white-space:pre-wrap;">${code.trim().replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`)
+    .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--text);">$1</strong>')
+    .replace(/\n/g, '<br>');
+
+  div.innerHTML = `
+    <div style="width:26px;height:26px;border-radius:50%;background:${avatarBg};border:1px solid ${avatarBorder};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">${avatar}</div>
+    <div style="flex:1;font-size:11px;color:${isAgent ? 'var(--text)' : 'var(--text2)'};line-height:1.6;padding-top:3px;">${html}</div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function _dbgShowTyping() {
+  const el = document.getElementById('dbg-messages');
+  if (!el) return;
+  const div = document.createElement('div');
+  div.id = 'dbg-typing';
+  div.style.cssText = 'display:flex;gap:8px;align-items:center;';
+  div.innerHTML = `
+    <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.4);display:flex;align-items:center;justify-content:center;font-size:13px;">🔬</div>
+    <div style="display:flex;gap:4px;align-items:center;">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--accent3);animation:typing .9s infinite;display:inline-block;"></span>
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--yellow);animation:typing .9s .15s infinite;display:inline-block;"></span>
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:typing .9s .3s infinite;display:inline-block;"></span>
+    </div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+function _dbgRemoveTyping() {
+  document.getElementById('dbg-typing')?.remove();
+}
+
+// ── Collect engine source (smart chunking) ──
+function _dbgGetSource() {
+  // Get full HTML source (architecture) trimmed to avoid token overflow
+  const src = document.documentElement.outerHTML;
+  // Limit: send first 18000 chars — covers all CSS + HTML + most JS core
+  // enough for Claude to understand the architecture
+  return src.length > 18000 ? src.slice(0, 18000) + '\n\n[...truncated — total: ' + src.length + ' chars]' : src;
+}
+
+function _dbgGetErrorLog() {
+  if (_dbgErrors.length === 0) return 'Nenhum erro capturado no console.';
+  return _dbgErrors.map(e =>
+    `[${e.time}] ${e.type.toUpperCase()}: ${e.msg}${e.stack ? '\n  Stack: ' + e.stack.split('\n').slice(0, 3).join(' | ') : ''}`
+  ).join('\n');
+}
+
+function _dbgGetConsoleLog() {
+  // Grab last 20 lines from engine's own console
+  const lines = document.querySelectorAll('#console-lines .console-line');
+  const recent = Array.from(lines).slice(-20).map(l => l.textContent.trim());
+  return recent.length ? recent.join('\n') : '(console vazio)';
+}
+
+// ── Main send ──
+async function dbgSend() {
+  const input = document.getElementById('dbg-input');
+  const msg   = input?.value.trim();
+  if (!msg) return;
+  input.value = '';
+  await _dbgCallAgent(msg, 'user');
+}
+
+async function dbgCaptureAndSend(mode) {
+  const errs = _dbgGetErrorLog();
+  const cons = _dbgGetConsoleLog();
+  const autoMsg = `Analise automaticamente os erros abaixo e o console da engine. Identifique causas e gere um patch corrigido.\n\nERROS CAPTURADOS:\n${errs}\n\nCONSOLE DA ENGINE (últimas 20 linhas):\n${cons}`;
+  openDebugEngine();
+  await _dbgCallAgent(autoMsg, 'auto');
+}
+
+async function _dbgCallAgent(userMsg, displayRole) {
+  if (!apiKey) {
+    _dbgAddMsg('agent', '⚠️ **API Key não configurada.** Vá em **☰ > 🔑 API Key** e configure sua chave Anthropic.');
+    return;
+  }
+
+  if (displayRole === 'user') _dbgAddMsg('user', userMsg);
+  _dbgSetStatus('Analisando...', 'var(--yellow)');
+  document.getElementById('dbg-send-btn').disabled = true;
+  _dbgShowTyping();
+
+  const src = _dbgGetSource();
+  const errLog = _dbgGetErrorLog();
+  const consLog = _dbgGetConsoleLog();
+
+  const systemPrompt = `Você é o **Debug Agent** da KaezarEngine v2 — um assistente especializado em analisar e corrigir a arquitetura do próprio app.
+
+CONTEXTO:
+- O app é um único arquivo HTML auto-contido (~2500 linhas) com HTML5 Canvas, Three.js r128 e Web Audio API
+- Ele contém sua própria game engine 2D/3D, sistema de entidades, inspector, AI agent integrado e UI mobile
+- Você vai receber o código-fonte completo (ou parte dele), erros do console e logs internos
+
+CÓDIGO-FONTE ATUAL (pode estar truncado):
+\`\`\`html
+${src}
+\`\`\`
+
+ERROS DO CONSOLE (interceptados):
+${errLog}
+
+CONSOLE INTERNO DA ENGINE:
+${consLog}
+
+INSTRUÇÕES:
+1. Analise o problema descrito + os erros capturados
+2. Identifique a causa-raiz no código
+3. Gere o patch em blocos \`\`\`javascript ... \`\`\` ou \`\`\`html ... \`\`\`
+4. Cada patch deve ser uma função completa ou bloco de CSS/HTML que **substitui** o trecho problemático
+5. Após os patches, escreva uma linha começando com "PATCH_SUMMARY:" seguida de uma descrição curta (max 120 chars) do que foi corrigido
+6. Se o fix requer reinício do app (mudanças em estrutura HTML, CSS global, ou funções chamadas no init), escreva "REQUER_RESTART:true" na última linha
+7. Se não requer reinício (apenas redefinição de funções JS em runtime), escreva "REQUER_RESTART:false"
+8. Seja direto e técnico. Responda em Português (Brasil).`;
+
+  _dbgHistory.push({ role: 'user', content: userMsg });
+
+  try {
+    const result = await _callAI(systemPrompt, _dbgHistory, 4000);
+    _dbgRemoveTyping();
+
+    const reply = result.text;
+    _dbgHistory.push({ role: 'assistant', content: reply });
+
+    // Parse patch metadata
+    const summaryMatch = reply.match(/PATCH_SUMMARY:\s*(.+)/);
+    const restartMatch = reply.match(/REQUER_RESTART:(true|false)/i);
+    const needsRestart = restartMatch ? restartMatch[1].toLowerCase() === 'true' : false;
+
+    // Extract all code blocks as patch
+    const codeBlocks = [];
+    const codeRe = /```(?:javascript|js|html|css)\n?([\s\S]*?)```/g;
+    let m;
+    while ((m = codeRe.exec(reply)) !== null) codeBlocks.push(m[1].trim());
+
+    // Clean reply for display (remove metadata lines)
+    const displayReply = reply
+      .replace(/PATCH_SUMMARY:.+/g, '')
+      .replace(/REQUER_RESTART:(true|false)/gi, '')
+      .trim();
+
+    _dbgAddMsg('agent', displayReply);
+    _dbgSetStatus('Pronto', 'var(--green)');
+    log(`🔬 Debug Agent (${AI_PROVIDERS[_activeProvider]?.name||'AI'}) respondeu (${result.usage?.total_tokens||result.usage?.output_tokens||'?'} tokens)`, 'info');
+
+    // If there are code patches, show patch area
+    if (codeBlocks.length > 0) {
+      _dbgPatch = { blocks: codeBlocks, summary: summaryMatch ? summaryMatch[1] : 'Correção gerada pelo Debug Agent', needsRestart };
+      _dbgShowPatchArea();
+    }
+
+  } catch(err) {
+    _dbgRemoveTyping();
+    _dbgSetStatus('Erro', 'var(--red)');
+    _dbgAddMsg('agent', `❌ Erro: ${err.message}`);
+  }
+
+  document.getElementById('dbg-send-btn').disabled = false;
+}
+
+// ── Patch UI ──
+function _dbgShowPatchArea() {
+  if (!_dbgPatch) return;
+  const area = document.getElementById('dbg-patch-area');
+  const summary = document.getElementById('dbg-patch-summary');
+  area.style.display = 'block';
+  const restartNote = _dbgPatch.needsRestart
+    ? ' <span style="color:var(--yellow);">⚠ Requer reinício</span>'
+    : ' <span style="color:var(--green);">✅ Aplicável em runtime</span>';
+  summary.innerHTML = `${_dbgPatch.summary}${restartNote}<br><span style="color:var(--text3);font-size:10px;">${_dbgPatch.blocks.length} bloco(s) de código</span>`;
+  document.getElementById('dbg-messages').scrollTop = 9999;
+}
+
+function dbgDismissPatch() {
+  _dbgPatch = null;
+  document.getElementById('dbg-patch-area').style.display = 'none';
+}
+
+// ── Apply patch ──
+function dbgApplyPatch() {
+  if (!_dbgPatch) return;
+
+  const { blocks, summary, needsRestart } = _dbgPatch;
+  const timestamp = Date.now();
+
+  // Save patch to localStorage so it survives reload
+  const existing = JSON.parse(localStorage.getItem('kaezar_patches') || '[]');
+  existing.push({ timestamp, summary, blocks, applied: false });
+  localStorage.setItem('kaezar_patches', JSON.stringify(existing));
+
+  if (!needsRestart) {
+    // Apply JS patches in runtime — redefine functions / eval blocks
+    let applyErrors = 0;
+    blocks.forEach((block, i) => {
+      try {
+        // eslint-disable-next-line no-eval
+        eval(block);
+        log(`🔬 Patch ${i + 1}/${blocks.length} aplicado em runtime`, 'info');
+      } catch(e) {
+        applyErrors++;
+        log(`🔬 Patch ${i + 1} erro runtime: ${e.message}`, 'error');
+      }
+    });
+    // Mark as applied
+    existing[existing.length - 1].applied = true;
+    localStorage.setItem('kaezar_patches', JSON.stringify(existing));
+    _dbgPatch = null;
+    document.getElementById('dbg-patch-area').style.display = 'none';
+    _dbgAddMsg('agent', `✅ **Patch aplicado em runtime** (${blocks.length - applyErrors}/${blocks.length} blocos OK).\n\nSe o problema persistir, use **⚡ ANALISAR** novamente ou descreva o que ainda está errado.`);
+    log(`🔬 Debug patch aplicado: ${summary}`, 'info');
+  } else {
+    // Needs restart: save patched source to localStorage
+    _dbgSavePatchedSource(blocks, summary);
+  }
+}
+
+function _dbgSavePatchedSource(blocks, summary) {
+  // Build patched HTML: inject patches as an extra <script> at the end, before </body>
+  // On next load, these run after the main script and redefine functions
+  const patchScript = `\n<script id="kaezar-debug-patch" data-summary="${summary.replace(/"/g,'&quot;')}">\n// Debug patch applied: ${new Date().toISOString()}\n${blocks.join('\n\n')}\n<\/script>`;
+
+  const originalSrc = document.documentElement.outerHTML;
+  // Remove any previous patch script first
+  const cleanSrc = originalSrc.replace(/<script id="kaezar-debug-patch"[\s\S]*?<\/script>/g, '');
+  const patchedSrc = cleanSrc.replace('</body>', patchScript + '\n</body>');
+
+  // Save to localStorage (as a downloadable blob trigger on next load)
+  localStorage.setItem('kaezar_patched_src', patchedSrc);
+  localStorage.setItem('kaezar_patch_summary', summary);
+  localStorage.setItem('kaezar_patch_pending_restart', '1');
+
+  _dbgPatch = null;
+  document.getElementById('dbg-patch-area').style.display = 'none';
+
+  // Show restart modal
+  openModal('restart-modal');
+  log(`🔬 Patch salvo — aguardando reinício: ${summary}`, 'info');
+}
+
+function dbgExportHTML() {
+  const full = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+  // Estratégia 1 — Clipboard (mais confiável no Android)
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(full).then(() => {
+      _dbgAddMsg('agent', `📋 **HTML copiado para a área de transferência!**\n\n**Como salvar:**\n1. Abra um app de editor de texto (Ex: **Acode**, **QuickEdit**, **Markor**)\n2. Crie um novo arquivo chamado \`KaezarEngine_patched.html\`\n3. Cole (pressione e segure → Colar)\n4. Salve o arquivo\n\nOu use o botão abaixo para tentar download direto.`);
+    }).catch(() => {
+      _dbgAddMsg('agent', '⚠️ Clipboard bloqueado. Tente o botão de download abaixo.');
+    });
+  } else {
+    _dbgAddMsg('agent', '⚠️ Clipboard não disponível neste browser.');
+  }
+
+  // Estratégia 2 — Download via data: URI (evita problema do blob no Android)
+  try {
+    const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(full);
+    const a = document.createElement('a');
+    a.href = encoded;
+    a.download = 'KaezarEngine_patched.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch(e) {}
+
+  _dbgAddMsg('agent', `<div style="margin-top:6px;padding:10px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.25);border-radius:8px;font-size:11px;color:var(--text2);line-height:1.8;">
+  <b style="color:var(--accent);">💡 Se o download falhar:</b><br>
+  1. Instale o app <b>Acode</b> (editor de código Android)<br>
+  2. Use o botão 📋 — o HTML já está na área de transferência<br>
+  3. Cole e salve como <b>.html</b>
+  </div>`);
+}
+
+function dbgExportNewTab() {
+  const full = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const blob = new Blob([full], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+}
+
+// ── GitHub Pages Publisher ──
+(function _ghLoadConfig() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('kaezar_gh_config') || '{}');
+    if (cfg.user)   setTimeout(() => { const el = document.getElementById('gh-user-input');   if(el) el.value = cfg.user; }, 500);
+    if (cfg.repo)   setTimeout(() => { const el = document.getElementById('gh-repo-input');   if(el) el.value = cfg.repo; }, 500);
+    if (cfg.branch) setTimeout(() => { const el = document.getElementById('gh-branch-input'); if(el) el.value = cfg.branch; }, 500);
+    if (cfg.file)   setTimeout(() => { const el = document.getElementById('gh-file-input');   if(el) el.value = cfg.file; }, 500);
+    if (cfg.token)  setTimeout(() => { const el = document.getElementById('gh-token-input');  if(el) el.value = cfg.token; }, 500);
+  } catch(e) {}
+})();
+
+function toggleGhTokenVis() {
+  const el = document.getElementById('gh-token-input');
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+function ghSaveConfig() {
+  const cfg = {
+    user:   document.getElementById('gh-user-input').value.trim(),
+    repo:   document.getElementById('gh-repo-input').value.trim(),
+    branch: document.getElementById('gh-branch-input').value.trim(),
+    file:   document.getElementById('gh-file-input').value.trim(),
+    token:  document.getElementById('gh-token-input').value.trim(),
+  };
+  localStorage.setItem('kaezar_gh_config', JSON.stringify(cfg));
+  ghSetStatus('✅ Configuração salva!', 'var(--green)');
+}
+
+function ghSetStatus(msg, color) {
+  const el = document.getElementById('gh-publish-status');
+  el.style.display = 'block';
+  el.style.background = 'rgba(0,0,0,.3)';
+  el.style.border = `1px solid ${color}`;
+  el.style.color = color;
+  el.innerHTML = msg;
+}
+
+async function ghPublish() {
+  const token  = document.getElementById('gh-token-input').value.trim();
+  const user   = document.getElementById('gh-user-input').value.trim();
+  const repo   = document.getElementById('gh-repo-input').value.trim();
+  const branch = document.getElementById('gh-branch-input').value.trim() || 'principal';
+  const file   = document.getElementById('gh-file-input').value.trim() || 'KaezarEngine.html';
+
+  if (!token || !user || !repo) {
+    ghSetStatus('⚠️ Preencha Token, Usuário e Repositório.', 'var(--yellow)');
+    return;
+  }
+
+  ghSetStatus('⏳ Preparando upload...', 'var(--accent)');
+
+  const content = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+
+  const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${file}`;
+
+  try {
+    // Verificar se o arquivo já existe (para pegar o SHA)
+    ghSetStatus('⏳ Verificando arquivo existente...', 'var(--accent)');
+    let sha = null;
+    const checkResp = await fetch(apiUrl + `?ref=${branch}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github+json',
+      }
+    });
+    if (checkResp.ok) {
+      const checkData = await checkResp.json();
+      sha = checkData.sha;
+    }
+
+    // Fazer upload
+    ghSetStatus('⏳ Enviando para o GitHub...', 'var(--accent)');
+    const body = {
+      message: `🤖 KaezarEngine atualizado via Debug Engine — ${new Date().toLocaleString('pt-BR')}`,
+      content: encoded,
+      branch: branch,
+    };
+    if (sha) body.sha = sha;
+
+    const resp = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (resp.ok) {
+      const data = await resp.json();
+      const pagesUrl = `https://${user}.github.io/${repo}`;
+      ghSetStatus(`✅ <b>Publicado com sucesso!</b><br>GitHub Pages atualiza em ~1 min.<br><a href="${pagesUrl}" target="_blank" style="color:var(--accent);">${pagesUrl}</a>`, 'var(--green)');
+      _dbgAddMsg('agent', `🐙 **Publicado no GitHub!** Acesse em ~1 min:\n${pagesUrl}`);
+      ghSaveConfig();
+    } else {
+      const err = await resp.json();
+      ghSetStatus(`❌ Erro ${resp.status}: ${err.message}`, 'var(--red)');
+    }
+  } catch(e) {
+    ghSetStatus(`❌ Erro de rede: ${e.message}`, 'var(--red)');
+  }
+}
+
+function dbgRestartNow() {
+  closeModal('restart-modal');
+  // Offer download of patched file before reloading
+  const patchedSrc = localStorage.getItem('kaezar_patched_src');
+  if (patchedSrc) {
+    // Auto-download the patched HTML so user has it as file
+    const blob = new Blob([patchedSrc], { type: 'text/html' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'KaezarEngine_patched.html';
+    a.click();
+    URL.revokeObjectURL(url);
+    log('💾 Arquivo corrigido baixado! Recarregando...', 'info');
+  }
+  setTimeout(() => location.reload(), 800);
+}
+
+// ── On load: check if there's a pending patch restart ──
+(function dbgCheckPendingRestart() {
+  if (localStorage.getItem('kaezar_patch_pending_restart') === '1') {
+    localStorage.removeItem('kaezar_patch_pending_restart');
+    const summary = localStorage.getItem('kaezar_patch_summary') || 'Patch anterior';
+    localStorage.removeItem('kaezar_patch_summary');
+    setTimeout(() => {
+      log(`🔬 App reiniciado com patch aplicado: "${summary}"`, 'info');
+      _dbgAddMsg && _dbgAddMsg('agent', `✅ **Reinício concluído.** O patch "${summary}" está ativo.\n\nSe o problema foi resolvido, ótimo! Se persistir, descreva abaixo.`);
+    }, 500);
+  }
+})();
+</script>
+</body>
+</html>
