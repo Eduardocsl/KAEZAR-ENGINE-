@@ -3,7 +3,7 @@ name: Deploy KaezarEngine to GitHub Pages
 on:
   push:
     branches:
-      - principal
+      - main
 
 permissions:
   contents: read
