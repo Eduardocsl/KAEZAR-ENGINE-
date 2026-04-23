@@ -644,12 +644,12 @@ body.playing #canvas-wrap{outline:2px solid var(--green);outline-offset:-2px;}
     </div>
     <div id="canvas-wrap">
       <!-- 2D Canvas -->
-      <canvas id="gameCanvas" width="360" height="569"></canvas>
+      <canvas id="gameCanvas" width="360" height="519"></canvas>
       <!-- 3D Canvas via Three.js -->
       <canvas id="threeCanvas"></canvas>
       <div id="canvas-overlay">
         <div class="vp-info">
-          FPS: <span id="fps-counter">60</span> · Pos: <span id="mouse-world">0, 0</span>
+          FPS: <span id="fps-counter">56</span> · Pos: <span id="mouse-world">0, 0</span>
         </div>
         <div class="vp-mode-label label2d" id="mode-label">2D</div>
       </div>
@@ -668,7 +668,7 @@ body.playing #canvas-wrap{outline:2px solid var(--green);outline-offset:-2px;}
       </div>
 
       <!-- MOBILE PANEL NAV -->
-      <div id="mob-panel-nav" style="display: flex;">
+      <div id="mob-panel-nav" style="display: none;">
         <div class="mob-nav-btn" id="mob-nav-hier" onclick="mobTogglePanel('left')" title="Hierarquia">
           📋<span>Hierarquia</span>
         </div>
@@ -763,7 +763,7 @@ body.playing #canvas-wrap{outline:2px solid var(--green);outline-offset:-2px;}
 <div class="resize-v" onmousedown="startResizeV(event)"></div>
 
 <!-- MOBILE PULL TAB -->
-<div id="mob-pull-tab" onclick="toggleBottomPanel()" style="display: flex;"></div>
+<div id="mob-pull-tab" onclick="toggleBottomPanel()" style="display: none;"></div>
 
 <!-- BOTTOM PANEL -->
 <div id="bottom-panel">
@@ -779,7 +779,7 @@ body.playing #canvas-wrap{outline:2px solid var(--green);outline-offset:-2px;}
     </div>
   </div>
   <div id="console-panel" class="active">
-    <div id="console-lines" style="flex:1;overflow-y:auto;"><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ 📱 Modo mobile ativado. Use os botões na barra inferior para navegar.</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ Criado [2D]: Rect 1</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ Criado [2D]: Rect 2</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ Criado [2D]: Círculo 1</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ Criado [2D]: Texto 1</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ 🚀 KaezarEngine v2.0 iniciado! 2D + 3D + AI Agent ativo.</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ 💡 Clique em ⚡ AI AGENT para gerar código com IA.</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ 💡 Use Puter (grátis/sem key) ou configure uma API Key no ícone 🔑.</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ 💡 Mude para modo 3D e crie cubos, esferas e mais!</span></div><div class="console-line info"><span class="console-time">11:01:40</span><span>ℹ ⚡ Puter.js conectado como active_piano_689</span></div><div class="console-line info"><span class="console-time">11:01:40</span><span>ℹ ⚡ Puter.js ativado! Modelo: deepseek/deepseek-r1</span></div><div class="console-line info"><span class="console-time">11:01:56</span><span>ℹ 🔑 Puter.js salvo e ativo!</span></div><div class="console-line info"><span class="console-time">11:02:04</span><span>ℹ 🔑 Puter.js salvo e ativo!</span></div><div class="console-line info"><span class="console-time">11:04:33</span><span>ℹ 🔬 Debug Agent (Puter.js) respondeu (? tokens)</span></div><div class="console-line info"><span class="console-time">11:05:39</span><span>ℹ 🔬 Patch 1/3 aplicado em runtime</span></div><div class="console-line error"><span class="console-time">11:05:39</span><span>✕ 🔬 Patch 2 erro runtime: Invalid or unexpected token</span></div><div class="console-line error"><span class="console-time">11:05:39</span><span>✕ 🔬 Patch 3 erro runtime: Invalid or unexpected token</span></div><div class="console-line info"><span class="console-time">11:05:40</span><span>ℹ 🔬 Debug patch aplicado: ** Corrigido export GitHub para incluir HTML + patches AI (AI_PATCHES.md) + histórico (ai_history.json)</span></div><div class="console-line info"><span class="console-time">11:06:57</span><span>ℹ 🔬 Debug Agent (Puter.js) respondeu (? tokens)</span></div><div class="console-line info"><span class="console-time">11:07:05</span><span>ℹ 🔬 Patch salvo — aguardando reinício: ') ||</span></div><div class="console-line info"><span class="console-time">11:08:35</span><span>ℹ 🔬 Debug Agent (Puter.js) respondeu (? tokens)</span></div><div class="console-line info"><span class="console-time">11:09:00</span><span>ℹ 🔬 Patch 1/1 aplicado em runtime</span></div><div class="console-line info"><span class="console-time">11:09:00</span><span>ℹ 🔬 Debug patch aplicado: Correção gerada pelo Debug Agent</span></div><div class="console-line info"><span class="console-time">11:10:34</span><span>ℹ 🔑 Puter.js salvo e ativo!</span></div></div>
+    <div id="console-lines" style="flex:1;overflow-y:auto;"><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ 📱 Modo mobile ativado. Use os botões na barra inferior para navegar.</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ Criado [2D]: Rect 1</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ Criado [2D]: Rect 2</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ Criado [2D]: Círculo 1</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ Criado [2D]: Texto 1</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ 🚀 KaezarEngine v2.0 iniciado! 2D + 3D + AI Agent ativo.</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ 💡 Clique em ⚡ AI AGENT para gerar código com IA.</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ 💡 Use Puter (grátis/sem key) ou configure uma API Key no ícone 🔑.</span></div><div class="console-line info"><span class="console-time">11:01:07</span><span>ℹ 💡 Mude para modo 3D e crie cubos, esferas e mais!</span></div><div class="console-line info"><span class="console-time">11:01:40</span><span>ℹ ⚡ Puter.js conectado como active_piano_689</span></div><div class="console-line info"><span class="console-time">11:01:40</span><span>ℹ ⚡ Puter.js ativado! Modelo: deepseek/deepseek-r1</span></div><div class="console-line info"><span class="console-time">11:01:56</span><span>ℹ 🔑 Puter.js salvo e ativo!</span></div><div class="console-line info"><span class="console-time">11:02:04</span><span>ℹ 🔑 Puter.js salvo e ativo!</span></div><div class="console-line info"><span class="console-time">11:04:33</span><span>ℹ 🔬 Debug Agent (Puter.js) respondeu (? tokens)</span></div><div class="console-line info"><span class="console-time">11:05:39</span><span>ℹ 🔬 Patch 1/3 aplicado em runtime</span></div><div class="console-line error"><span class="console-time">11:05:39</span><span>✕ 🔬 Patch 2 erro runtime: Invalid or unexpected token</span></div><div class="console-line error"><span class="console-time">11:05:39</span><span>✕ 🔬 Patch 3 erro runtime: Invalid or unexpected token</span></div><div class="console-line info"><span class="console-time">11:05:40</span><span>ℹ 🔬 Debug patch aplicado: ** Corrigido export GitHub para incluir HTML + patches AI (AI_PATCHES.md) + histórico (ai_history.json)</span></div><div class="console-line info"><span class="console-time">11:06:57</span><span>ℹ 🔬 Debug Agent (Puter.js) respondeu (? tokens)</span></div><div class="console-line info"><span class="console-time">11:07:05</span><span>ℹ 🔬 Patch salvo — aguardando reinício: ') ||</span></div><div class="console-line info"><span class="console-time">11:08:35</span><span>ℹ 🔬 Debug Agent (Puter.js) respondeu (? tokens)</span></div><div class="console-line info"><span class="console-time">11:09:00</span><span>ℹ 🔬 Patch 1/1 aplicado em runtime</span></div><div class="console-line info"><span class="console-time">11:09:00</span><span>ℹ 🔬 Debug patch aplicado: Correção gerada pelo Debug Agent</span></div><div class="console-line info"><span class="console-time">11:10:34</span><span>ℹ 🔑 Puter.js salvo e ativo!</span></div><div class="console-line info"><span class="console-time">21:01:32</span><span>ℹ 📱 Modo mobile ativado. Use os botões na barra inferior para navegar.</span></div><div class="console-line info"><span class="console-time">21:01:32</span><span>ℹ Criado [2D]: Rect 1</span></div><div class="console-line info"><span class="console-time">21:01:32</span><span>ℹ Criado [2D]: Rect 2</span></div><div class="console-line info"><span class="console-time">21:01:32</span><span>ℹ Criado [2D]: Círculo 1</span></div><div class="console-line info"><span class="console-time">21:01:32</span><span>ℹ Criado [2D]: Texto 1</span></div><div class="console-line info"><span class="console-time">21:01:32</span><span>ℹ 🚀 KaezarEngine v2.0 iniciado! 2D + 3D + AI Agent ativo.</span></div><div class="console-line info"><span class="console-time">21:01:32</span><span>ℹ 💡 Clique em ⚡ AI AGENT para gerar código com IA.</span></div><div class="console-line info"><span class="console-time">21:01:32</span><span>ℹ 💡 Use Puter (grátis/sem key) ou configure uma API Key no ícone 🔑.</span></div><div class="console-line info"><span class="console-time">21:01:32</span><span>ℹ 💡 Mude para modo 3D e crie cubos, esferas e mais!</span></div><div class="console-line info"><span class="console-time">21:03:43</span><span>ℹ ⚡ Puter.js conectado como avid_tuba_3544</span></div><div class="console-line info"><span class="console-time">21:03:43</span><span>ℹ ⚡ Puter.js ativado! Modelo: deepseek/deepseek-v3.2</span></div><div class="console-line info"><span class="console-time">21:06:50</span><span>ℹ 🔬 Debug Agent (Puter.js) respondeu (? tokens)</span></div><div class="console-line error"><span class="console-time">21:07:12</span><span>✕ 🔬 Patch 1 erro runtime: Invalid or unexpected token</span></div></div>
   </div>
   <div id="script-panel">
     <textarea id="script-editor" spellcheck="false" placeholder="// Selecione um objeto e clique em 'Editar Script'
@@ -912,8 +912,8 @@ body.playing #canvas-wrap{outline:2px solid var(--green);outline-offset:-2px;}
 
     <!-- Puter login row (visível só quando puter está selecionado) -->
     <div id="puter-login-row" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; padding: 12px; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px;">
-      <div id="puter-login-status" style="font-size:11px;color:var(--text2);text-align:center;">✅ Logado como <b>active_piano_689</b></div>
-      <button onclick="puterDoLogin()" id="puter-login-btn" style="padding: 10px; background: linear-gradient(135deg,var(--accent2),var(--accent)); color: #fff; border: none; border-radius: 8px; font-family: Oxanium, sans-serif; font-size: 12px; font-weight: 800; cursor: pointer;">⚡ Entrar com Puter (grátis)</button>
+      <div id="puter-login-status" style="font-size:11px;color:var(--text2);text-align:center;">✅ Logado como <b>avid_tuba_3544</b></div>
+      <button onclick="puterDoLogin()" id="puter-login-btn" style="padding: 10px; background: linear-gradient(135deg,var(--green),#00c853); color: rgb(0, 26, 4); border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; border-radius: 8px; font-family: Oxanium, sans-serif; font-size: 12px; font-weight: 800; cursor: pointer;">🔄 Reconectar conta Puter</button>
     </div>
 
     <!-- Model select -->
@@ -925,19 +925,7 @@ body.playing #canvas-wrap{outline:2px solid var(--green);outline-offset:-2px;}
     <!-- Saved providers list -->
     <div style="margin-top:14px;">
       <div style="font-size:9px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-family:'Oxanium',sans-serif;margin-bottom:6px;">PROVIDERS SALVOS</div>
-      <div id="saved-providers-list" style="display:flex;flex-direction:column;gap:4px;max-height:110px;overflow-y:auto;"><div class="saved-prov-row">
-      <span style="font-size:16px;">🔀</span>
-      <div style="flex:1;min-width:0;">
-        <div style="font-family:'Oxanium',sans-serif;font-weight:700;font-size:11px;color:#a78bfa;">OpenRouter</div>
-        <div style="font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">sk-or-v1••••••••59f5 · openrouter/free</div>
-      </div>
-      <button onclick="switchProvider('openrouter',null);document.getElementById('api-key-input').value='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';onKeyInput('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');" style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer;padding:2px 8px;font-size:10px;font-family:inherit;">
-        Editar
-      </button>
-      <button onclick="_setActiveProvider('openrouter')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer;padding:2px 8px;font-size:10px;font-family:inherit;">
-        Usar
-      </button>
-    </div></div>
+      <div id="saved-providers-list" style="display:flex;flex-direction:column;gap:4px;max-height:110px;overflow-y:auto;"><div style="font-size:10px;color:var(--text3);padding:4px 8px;">Nenhum provider salvo ainda.</div></div>
     </div>
 
     <!-- Proxy status -->
@@ -956,7 +944,7 @@ body.playing #canvas-wrap{outline:2px solid var(--green);outline-offset:-2px;}
     <div class="modal-btns" style="margin-top:14px;">
       <button class="btn-cancel" onclick="closeModal('api-modal')">Fechar</button>
       <button style="padding:6px 14px;border-radius:6px;border:1px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-family:inherit;font-size:11px;" onclick="clearCurrentKey()">🗑 Limpar</button>
-      <button class="btn-ok" id="api-save-btn" onclick="saveAPIKey()">💾 Salvar</button>
+      <button class="btn-ok" id="api-save-btn" onclick="saveAPIKey()" style="display: none;">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -1102,8 +1090,8 @@ body.playing #canvas-wrap{outline:2px solid var(--green);outline-offset:-2px;}
       </select>
       <div id="dbg-model-badge" style="font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.3);color:var(--green);white-space:nowrap;">★ Premium</div>
       <div style="display:flex;gap:6px;align-items:center;">
-        <div id="dbg-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--red);"></div>
-        <span id="dbg-status-label" style="font-size:10px;color:var(--text3);font-family:'Oxanium',sans-serif;">Erro</span>
+        <div id="dbg-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--green);"></div>
+        <span id="dbg-status-label" style="font-size:10px;color:var(--text3);font-family:'Oxanium',sans-serif;">Pronto</span>
       </div>
       <span onclick="closeModal('debug-modal')" style="cursor:pointer;color:var(--text3);font-size:18px;padding:4px 8px;">✕</span>
     </div>
@@ -1142,10 +1130,16 @@ body.playing #canvas-wrap{outline:2px solid var(--green);outline-offset:-2px;}
     <div style="width:26px;height:26px;border-radius:50%;background:rgba(124,77,255,.15);border:1px solid rgba(124,77,255,.4);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">👤</div>
     <div style="flex:1;font-size:11px;color:var(--text2);line-height:1.6;padding-top:3px;">Eu só preciso arualizar ou preciso apertar em exportar para que a reinicialização seja com patches efetivos?</div></div><div style="display: flex; gap: 8px; align-items: flex-start;">
     <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.4);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">🔬</div>
-    <div style="flex:1;font-size:11px;color:var(--text);line-height:1.6;padding-top:3px;">❌ Erro: undefined</div></div></div>
+    <div style="flex:1;font-size:11px;color:var(--text);line-height:1.6;padding-top:3px;">❌ Erro: undefined</div></div><div style="display: flex; gap: 8px; align-items: flex-start;">
+    <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.4);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">🔬</div>
+    <div style="flex:1;font-size:11px;color:var(--text);line-height:1.6;padding-top:3px;">🔬 <strong style="color:var(--text);">Debug Agent ativo</strong> · ⚡ Puter · Claude Sonnet 4.5 ★<br><br>Posso analisar erros do console e gerar patches corrigidos.<br><br>Descreva o problema ou clique em <strong style="color:var(--text);">⚡ ANALISAR</strong> para examinar os erros automaticamente.<br><br>💡 <strong style="color:var(--text);">Dica:</strong> Use <strong style="color:var(--text);">Puter · Claude Sonnet</strong> ou <strong style="color:var(--text);">Claude Sonnet 4</strong> no seletor acima.</div></div><div style="display: flex; gap: 8px; align-items: flex-start;">
+    <div style="width:26px;height:26px;border-radius:50%;background:rgba(124,77,255,.15);border:1px solid rgba(124,77,255,.4);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">👤</div>
+    <div style="flex:1;font-size:11px;color:var(--text2);line-height:1.6;padding-top:3px;">Ajuste a interface para mobile:</div></div><div style="display: flex; gap: 8px; align-items: flex-start;">
+    <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.4);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">🔬</div>
+    <div style="flex:1;font-size:11px;color:var(--text);line-height:1.6;padding-top:3px;"># Análise do Problema<br><br>O app possui uma interface desktop complexa com painéis laterais, toolbar e múltiplas seções que não se adaptam bem para telas mobile. Preciso criar uma interface responsiva com navegação por abas/drawer e controles touch-friendly.<br><br># Patches de Correção<br><br>## Patch 1: CSS Responsivo Mobile<br><br><pre style="background:var(--bg0);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:10px;overflow-x:auto;margin:6px 0;color:var(--accent3);line-height:1.6;white-space:pre-wrap;">/* ── MOBILE RESPONSIVE ── */<br>@media (max-width: 768px) {<br>  :root {<br>    --panel: 0px;<br>    --panel-r: 0px;<br>    --toolbar: 48px;<br>    --statusbar: 32px;<br>  }<br><br>  /* Ocultar painéis laterais por padrão */<br>  .panel.left, .panel.right {<br>    position: fixed;<br>    top: 38px;<br>    bottom: var(--statusbar);<br>    width: 85vw;<br>    max-width: 320px;<br>    z-index: 500;<br>    transform: translateX(-100%);<br>    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);<br>    box-shadow: 4px 0 24px rgba(0,0,0,0.5);<br>  }<br><br>  .panel.right {<br>    right: 0;<br>    left: auto;<br>    transform: translateX(100%);<br>    box-shadow: -4px 0 24px rgba(0,0,0,0.5);<br>  }<br><br>  .panel.left.open {<br>    transform: translateX(0);<br>  }<br><br>  .panel.right.open {<br>    transform: translateX(0);<br>  }<br><br>  /* Overlay para fechar painéis */<br>  .mobile-overlay {<br>    display: none;<br>    position: fixed;<br>    inset: 0;<br>    background: rgba(0,0,0,0.6);<br>    z-index: 499;<br>    backdrop-filter: blur(2px);<br>  }<br><br>  .mobile-overlay.active {<br>    display: block;<br>  }<br><br>  /* Menubar mobile */<br>  #menubar {<br>    height: 38px;<br>    padding: 0 4px;<br>    gap: 2px;<br>  }<br><br>  .logo {<br>    font-size: 13px;<br>    margin-right: 8px;<br>  }<br><br>  .menu-btn {<br>    padding: 4px 8px;<br>    font-size: 10px;<br>  }<br><br>  .ai-badge {<br>    margin-left: 4px;<br>  }<br><br>  .ai-indicator {<br>    padding: 3px 8px;<br>    gap: 4px;<br>  }<br><br>  .ai-label {<br>    font-size: 9px;<br>  }<br><br>  /* Toolbar mobile */<br>  #toolbar {<br>    height: var(--toolbar);<br>    padding: 0 4px;<br>    gap: 4px;<br>    overflow-x: auto;<br>    overflow-y: hidden;<br>    -webkit-overflow-scrolling: touch;<br>  }<br><br>  .tool-btn {<br>    width: 40px;<br>    height: 40px;<br>    font-size: 16px;<br>    flex-shrink: 0;<br>  }<br><br>  .mode-badge {<br>    padding: 4px 12px;<br>    font-size: 10px;<br>  }<br><br>  .play-group {<br>    gap: 6px;<br>  }<br><br>  .play-btn {<br>    padding: 8px 16px;<br>    font-size: 12px;<br>    min-width: 60px;<br>  }<br><br>  /* Viewport mobile */<br>  #viewport-wrap {<br>    flex: 1;<br>  }<br><br>  #canvas-wrap {<br>    touch-action: none;<br>  }<br><br>  .vp-info {<br>    font-size: 9px;<br>    padding: 3px 8px;<br>    top: 4px;<br>    left: 4px;<br>  }<br><br>  .vp-mode-label {<br>    top: 4px;<br>    right: 4px;<br>    font-size: 8px;<br>    padding: 2px 8px;<br>  }<br><br>  /* AI Panel mobile */<br>  #ai-panel {<br>    height: 60vh;<br>    max-height: 400px;<br>  }<br><br>  .ai-panel-header {<br>    padding: 8px 12px;<br>  }<br><br>  .ai-panel-title {<br>    font-size: 11px;<br>  }<br><br>  #ai-messages {<br>    padding: 8px;<br>    gap: 8px;<br>  }<br><br>  .ai-msg .avatar {<br>    width: 28px;<br>    height: 28px;<br>    font-size: 13px;<br>  }<br><br>  .ai-msg .bubble {<br>    font-size: 12px;<br>  }<br><br>  .ai-input-row {<br>    padding: 8px;<br>    gap: 8px;<br>  }<br><br>  #ai-input {<br>    padding: 10px 12px;<br>    font-size: 13px;<br>  }<br><br>  #ai-send {<br>    padding: 10px 20px;<br>    font-size: 12px;<br>  }<br><br>  /* Bottom panel mobile */<br>  #bottom-panel {<br>    height: 40vh;<br>    max-height: 300px;<br>  }<br><br>  #bottom-tabs {<br>    overflow-x: auto;<br>    -webkit-overflow-scrolling: touch;<br>  }<br><br>  .btm-tab {<br>    padding: 8px 16px;<br>    font-size: 10px;<br>    white-space: nowrap;<br>  }<br><br>  .console-line {<br>    padding: 4px 8px;<br>    font-size: 11px;<br>  }<br><br>  #script-editor {<br>    font-size: 12px;<br>    padding: 12px;<br>  }<br><br>  /* Status bar mobile */<br>  #statusbar {<br>    height: var(--statusbar);<br>    padding: 0 8px;<br>    gap: 8px;<br>    overflow-x: auto;<br>    -webkit-overflow-scrolling: touch;<br>  }<br><br>  .status-item {<br>    font-size: 9px;<br>    white-space: nowrap;<br>  }<br><br>  /* Inspector mobile */<br>  .comp-header {<br>    padding: 10px 12px;<br>  }<br><br>  .comp-title {<br>    font-size: 12px;<br>  }<br><br>  .comp-body {<br>    padding: 8px 12px;<br>    gap: 8px;<br>  }<br><br>  .prop-row {<br>    flex-direction: column;<br>    align-items: stretch;<br>    gap: 4px;<br>  }<br><br>  .prop-label {<br>    width: 100%;<br>    font-size: 11px;<br>    font-weight: 600;<br>  }<br><br>  .prop-input {<br>    padding: 8px 10px;<br>    font-size: 13px;<br>  }<br><br>  .xyz-row {<br>    gap: 6px;<br>  }<br><br>  .xyz-input {<br>    padding: 6px 8px;<br>    font-size: 12px;<br>  }<br><br>  /* Hierarchy mobile */<br>  .hier-item {<br>    padding: 8px 12px;<br>    gap: 6px;<br>  }<br><br>  .hier-item .ei {<br>    font-size: 14px;<br>  }<br><br>  .hier-item .ename {<br>    font-size: 12px;<br>  }<br><br>  /* Modal mobile */<br>  .modal {<br>    width: 92vw;<br>    padding: 16px;<br>    max-height: 85vh;<br>    overflow-y: auto;<br>  }<br><br>  .modal h2 {<br>    font-size: 16px;<br>    margin-bottom: 14px;<br>  }<br><br>  .modal-row input,<br>  .modal-row select,<br>  .modal-row textarea {<br>    padding: 10px 12px;<br>    font-size: 13px;<br>  }<br><br>  .modal-btns button {<br>    padding: 10px 18px;<br>    font-size: 13px;<br>  }<br><br>  /* Botões mobile-friendly */<br>  .icon-btn {<br>    font-size: 16px;<br>    padding: 4px;<br>  }<br><br>  .add-comp-btn {<br>    padding: 10px;<br>    font-size: 12px;<br>  }<br>}<br><br>/* ── MOBILE NAVIGATION BAR ── */<br>.mobile-nav {<br>  display: none;<br>  position: fixed;<br>  bottom: var(--statusbar);<br>  left: 0;<br>  right: 0;<br>  height: 56px;<br>  background: var(--bg1);<br>  border-top: 1px solid var(--border);<br>  z-index: 600;<br>  justify-content: space-around;<br>  align-items: center;<br>  padding: 0 8px;<br>  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);<br>}<br><br>@media (max-width: 768px) {<br>  .mobile-nav {<br>    display: flex;<br>  }<br><br>  #bottom-panel {<br>    bottom: 56px;<br>  }<br><br>  #ai-panel {<br>    bottom: 56px;<br>  }<br>}<br><br>.mobile-nav-btn {<br>  display: flex;<br>  flex-direction: column;<br>  align-items: center;<br>  justify-content: center;<br>  gap: 4px;<br>  padding: 6px 12px;<br>  border-radius: 8px;<br>  background: transparent;<br>  border: none;<br>  color: var(--text3);<br>  cursor: pointer;<br>  transition: all 0.2s;<br>  font-family: 'Oxanium', sans-serif;<br>  min-width: 64px;<br>}<br><br>.mobile-nav-btn:active {<br>  transform: scale(0.95);<br>}<br><br>.mobile-nav-btn.active {<br>  background: linear-gradient(135deg, rgba(0,229,255,0.1), rgba(124,77,255,0.1));<br>  color: var(--accent);<br>}<br><br>.mobile-nav-btn .icon {<br>  font-size: 20px;<br>}<br><br>.mobile-nav-btn .label {<br>  font-size: 9px;<br>  font-weight: 600;<br>  letter-spacing: 0.5px;<br>}<br><br>/* Touch improvements */<br>@media (max-width: 768px) {<br>  * {<br>    -webkit-tap-highlight-color: transparent;<br>  }<br><br>  button, .tool-btn, .menu-btn, .hier-item, .dd-item {<br>    min-height: 44px;<br>    min-width: 44px;<br>  }<br><br>  input, select, textarea {<br>    font-size: 16px !important; /* Previne zoom no iOS */<br>  }<br>}</pre><br><br>## Patch 2: HTML Mobile Navigation<br><br>```javascript<br>function createMobileNavigation() {<br>  // Criar overlay para fechar painéis<br>  const overlay = document.createElement('div');<br>  overlay.className = 'mobile-overlay';<br>  overlay.addEventListener('click', closeMobilePanels);<br>  document.body.appendChild(overlay);<br><br>  // Criar barra de navegação mobile<br>  const mobileNav = document.createElement('div');<br>  mobileNav.className = 'mobile-nav';<br>  mobileNav.innerHTML = `<br>    <button class="mobile-nav-btn" data-action="hierarchy"><br>      <span class="icon">📋</span><br>      <span class="label">CENA</span><br>    </button><br>    <button class="mobile-nav-btn" data-action="inspector"><br>      <span class="icon">🔧</span><br>      <span class="label">PROPS</span><br>    </button><br>    <button class="mobile-nav-btn" data-action="console"><br>      <span class="icon">💬</span><br>      <span class="label">CONSOLE</span><br>    </button><br>    <button class="mobile-nav-btn" data-action="assets"><br>      <span class="icon">📦</span><br>      <span class="label">ASSETS</span><br>    </button><br>    <button class="mobile-nav-btn" data-action="ai"><br>      <span class="icon">⚡</span><br>      <span class="label">AI</span><br>    </button><br>  `;<br><br>  document.body.appendChild(mobileNav);<br><br>  // Event listeners<br>  mobileNav.querySelectorAll('.mobile-nav-btn').forEach(btn =&gt; {<br>    btn.addEventListener('click', (e) =&gt; {<br>      const action = btn.dataset.action;<br>      handleMobileNavAction(action, btn);<br>    });<br>  });<br>}<br><br>function handleMobileNavAction(action, btn) {<br>  const leftPanel = document.querySelector('.panel.left');<br>  const rightPanel = document.querySelector('.panel.right');<br>  const bottomPanel = document.getElementById('bottom-panel');<br>  const aiPanel = document.getElementById('ai-panel');<br>  const overlay = document.querySelector('.mobile-overlay');<br><br>  // Remover active de todos os botões<br>  document.querySelectorAll('.mobile-nav-btn').forEach(b =&gt; b.classList.remove('active'));<br><br>  // Fechar tudo primeiro<br>  closeMobilePanels();<br><br>  switch(action) {<br>    case 'hierarchy':<br>      leftPanel.classList.add('open');<br>      overlay.classList.add('active');<br>      btn.classList.add('active');<br>      // Ativar tab hierarchy<br>      document.querySelector('.panel-tab-btn[data-tab="hierarchy"]')?.click();<br>      break;<br><br>    case 'inspector':<br>      rightPanel.classList.add('open');<br>      overlay.classList.add('active');<br>      btn.classList.add('active');<br>      break;<br><br>    case 'console':<br>      bottomPanel.style.display = 'flex';<br>      btn.classList.add('active');<br>      document.querySelector('.btm-tab[data-tab="console"]')?.click();<br>      break;<br><br>    case 'assets':<br>      bottomPanel.style.display = 'flex';<br>      btn.classList.add('active');<br>      document.querySelector('.btm-tab[data-tab="assets"]')?.click();<br>      break;<br><br>    case 'ai':<br>      aiPanel.classList.remove('hidden');<br>      btn.classList.add('active');<br>      setTimeout(() =&gt; {<br>        document.getElementById('ai-input')?.focus();<br>      }, 300);<br>      break;<br>  }<br>}<br><br>function closeMobilePanels() {<br>  const leftPanel = document.querySelector('.panel.left');<br>  const rightPanel = document.querySelector('.panel.right');<br>  const overlay = document.querySelector('.mobile-overlay');<br>  <br>  leftPanel?.classList.remove('open');<br>  rightPanel?.classList.remove('open');<br>  overlay?.classList.remove('active');<br>}<br><br>// Detectar swipe para fechar painéis<br>function initMobileGestures() {<br>  let touchStartX = 0;<br>  let touchStartY = 0;<br><br>  document.addEventListener('touchstart', (e) =&gt; {<br>    touchStartX = e.touches[0].clientX;<br>    touchStartY = e.touches[0].clientY;<br>  }, { passive: true });<br><br>  document.addEventListener('touchend', (e) =&gt; {<br>    const touchEndX = e.changedTouches[0].clientX;<br>    const touchEndY = e.changedTouches[0].clientY;<br>    const diffX = touchEndX - touchStartX;<br>    const diffY = touchEndY - touchStartY;<br><br>    // Swipe horizontal &gt; 100px<br>    if (Math.abs(diffX) &gt; 100 &amp;&amp; Math.abs(diffY) &lt; 50) {<br>      const leftPanel = document.querySelector('.panel.left');<br>      const rightPanel = document.querySelector('.panel.right');<br><br>      // Swipe right to left (fechar painel esquerdo)<br>      if (diffX &lt; -100 &amp;&amp; leftPanel?.classList.contains('open')) {<br>        closeMobilePanels();<br>      }<br><br>      // Swipe left to right (fechar painel direito)<br>      if (diffX &gt; 100 &amp;&amp;</div></div></div>
 
     <!-- Pending patch area (hidden until patch arrives) -->
-    <div id="dbg-patch-area" style="display: none; padding: 10px 14px; background: rgba(0, 230, 118, 0.04); border-top: 1px solid rgba(0, 230, 118, 0.2); flex-shrink: 0;">
+    <div id="dbg-patch-area" style="display: block; padding: 10px 14px; background: rgba(0, 230, 118, 0.04); border-top: 1px solid rgba(0, 230, 118, 0.2); flex-shrink: 0;">
       <div style="font-size:10px;color:var(--green);font-family:'Oxanium',sans-serif;font-weight:700;margin-bottom:6px;">📦 PATCH PRONTO — Mudanças na arquitetura detectadas</div>
       <div id="dbg-patch-summary" style="font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.6;">Correção gerada pelo Debug Agent <span style="color:var(--green);">✅ Aplicável em runtime</span><br><span style="color:var(--text3);font-size:10px;">1 bloco(s) de código</span></div>
       <div style="display:flex;gap:8px;">
@@ -4088,7 +4082,856 @@ function dbgApplyPatch() {
 function _dbgPersistRuntimePatch(blocks, summary) {
   const patchScript = `\n<script id="kaezar-debug-patch-${Date.now()}" data-summary="${summary.replace(/"/g,'&quot;')}" data-runtime="true">\n// Runtime patch: ${new Date().toISOString()}\n${blocks.join('\n\n')}\n<\/script>`;
   const base = localStorage.getItem('kaezar_patched_src') || document.documentElement.outerHTML;
-  const patchedSrc = base.replace('</body>', patchScript + '\n</body>');
+  const patchedSrc = base.replace('
+<script id="kaezar-debug-patch-1776902832499" data-summary="Correção gerada pelo Debug Agent" data-runtime="true">
+// Runtime patch: 2026-04-23T00:07:12.499Z
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 768px) {
+  :root {
+    --panel: 0px;
+    --panel-r: 0px;
+    --toolbar: 48px;
+    --statusbar: 32px;
+  }
+
+  /* Ocultar painéis laterais por padrão */
+  .panel.left, .panel.right {
+    position: fixed;
+    top: 38px;
+    bottom: var(--statusbar);
+    width: 85vw;
+    max-width: 320px;
+    z-index: 500;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+  }
+
+  .panel.right {
+    right: 0;
+    left: auto;
+    transform: translateX(100%);
+    box-shadow: -4px 0 24px rgba(0,0,0,0.5);
+  }
+
+  .panel.left.open {
+    transform: translateX(0);
+  }
+
+  .panel.right.open {
+    transform: translateX(0);
+  }
+
+  /* Overlay para fechar painéis */
+  .mobile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 499;
+    backdrop-filter: blur(2px);
+  }
+
+  .mobile-overlay.active {
+    display: block;
+  }
+
+  /* Menubar mobile */
+  #menubar {
+    height: 38px;
+    padding: 0 4px;
+    gap: 2px;
+  }
+
+  .logo {
+    font-size: 13px;
+    margin-right: 8px;
+  }
+
+  .menu-btn {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .ai-badge {
+    margin-left: 4px;
+  }
+
+  .ai-indicator {
+    padding: 3px 8px;
+    gap: 4px;
+  }
+
+  .ai-label {
+    font-size: 9px;
+  }
+
+  /* Toolbar mobile */
+  #toolbar {
+    height: var(--toolbar);
+    padding: 0 4px;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tool-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .mode-badge {
+    padding: 4px 12px;
+    font-size: 10px;
+  }
+
+  .play-group {
+    gap: 6px;
+  }
+
+  .play-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+    min-width: 60px;
+  }
+
+  /* Viewport mobile */
+  #viewport-wrap {
+    flex: 1;
+  }
+
+  #canvas-wrap {
+    touch-action: none;
+  }
+
+  .vp-info {
+    font-size: 9px;
+    padding: 3px 8px;
+    top: 4px;
+    left: 4px;
+  }
+
+  .vp-mode-label {
+    top: 4px;
+    right: 4px;
+    font-size: 8px;
+    padding: 2px 8px;
+  }
+
+  /* AI Panel mobile */
+  #ai-panel {
+    height: 60vh;
+    max-height: 400px;
+  }
+
+  .ai-panel-header {
+    padding: 8px 12px;
+  }
+
+  .ai-panel-title {
+    font-size: 11px;
+  }
+
+  #ai-messages {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .ai-msg .avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+
+  .ai-msg .bubble {
+    font-size: 12px;
+  }
+
+  .ai-input-row {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  #ai-input {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  #ai-send {
+    padding: 10px 20px;
+    font-size: 12px;
+  }
+
+  /* Bottom panel mobile */
+  #bottom-panel {
+    height: 40vh;
+    max-height: 300px;
+  }
+
+  #bottom-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .btm-tab {
+    padding: 8px 16px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .console-line {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  #script-editor {
+    font-size: 12px;
+    padding: 12px;
+  }
+
+  /* Status bar mobile */
+  #statusbar {
+    height: var(--statusbar);
+    padding: 0 8px;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .status-item {
+    font-size: 9px;
+    white-space: nowrap;
+  }
+
+  /* Inspector mobile */
+  .comp-header {
+    padding: 10px 12px;
+  }
+
+  .comp-title {
+    font-size: 12px;
+  }
+
+  .comp-body {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .prop-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .prop-label {
+    width: 100%;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .prop-input {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .xyz-row {
+    gap: 6px;
+  }
+
+  .xyz-input {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  /* Hierarchy mobile */
+  .hier-item {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  .hier-item .ei {
+    font-size: 14px;
+  }
+
+  .hier-item .ename {
+    font-size: 12px;
+  }
+
+  /* Modal mobile */
+  .modal {
+    width: 92vw;
+    padding: 16px;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .modal h2 {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+
+  .modal-row input,
+  .modal-row select,
+  .modal-row textarea {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .modal-btns button {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+
+  /* Botões mobile-friendly */
+  .icon-btn {
+    font-size: 16px;
+    padding: 4px;
+  }
+
+  .add-comp-btn {
+    padding: 10px;
+    font-size: 12px;
+  }
+}
+
+/* ── MOBILE NAVIGATION BAR ── */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: var(--statusbar);
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--bg1);
+  border-top: 1px solid var(--border);
+  z-index: 600;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 8px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+}
+
+@media (max-width: 768px) {
+  .mobile-nav {
+    display: flex;
+  }
+
+  #bottom-panel {
+    bottom: 56px;
+  }
+
+  #ai-panel {
+    bottom: 56px;
+  }
+}
+
+.mobile-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Oxanium', sans-serif;
+  min-width: 64px;
+}
+
+.mobile-nav-btn:active {
+  transform: scale(0.95);
+}
+
+.mobile-nav-btn.active {
+  background: linear-gradient(135deg, rgba(0,229,255,0.1), rgba(124,77,255,0.1));
+  color: var(--accent);
+}
+
+.mobile-nav-btn .icon {
+  font-size: 20px;
+}
+
+.mobile-nav-btn .label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Touch improvements */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button, .tool-btn, .menu-btn, .hier-item, .dd-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  input, select, textarea {
+    font-size: 16px !important; /* Previne zoom no iOS */
+  }
+}
+</script>
+
+<script id="kaezar-debug-patch-1776902912249" data-summary="Correção gerada pelo Debug Agent" data-runtime="true">
+// Runtime patch: 2026-04-23T00:08:32.249Z
+// Swipe left to right (fechar painel direito)
+      if (diffX > 100 && rightPanel?.classList.contains('open')) {
+        closeMobilePanels();
+      }
+    }
+
+    // Swipe down para fechar AI panel ou bottom panel
+    if (diffY > 80 && Math.abs(diffX) < 50) {
+      const aiPanel = document.getElementById('ai-panel');
+      const bottomPanel = document.getElementById('bottom-panel');
+      
+      if (!aiPanel?.classList.contains('hidden')) {
+        aiPanel.classList.add('hidden');
+        document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+      } else if (bottomPanel?.style.display === 'flex') {
+        bottomPanel.style.display = 'none';
+        document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+      }
+    }
+  }, { passive: true });
+}
+
+// Ajustar canvas para touch
+function initMobileTouchCanvas() {
+  const canvas2D = document.getElementById('gameCanvas');
+  const canvas3D = document.getElementById('threeCanvas');
+
+  [canvas2D, canvas3D].forEach(canvas => {
+    if (!canvas) return;
+
+    let lastTouchDistance = 0;
+    let isPinching = false;
+
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        isPinching = true;
+        lastTouchDistance = getTouchDistance(e.touches);
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (isPinching && e.touches.length === 2) {
+        const currentDistance = getTouchDistance(e.touches);
+        const delta = currentDistance - lastTouchDistance;
+        
+        // Zoom com pinch
+        if (Math.abs(delta) > 5) {
+          handlePinchZoom(delta > 0 ? 1.05 : 0.95);
+          lastTouchDistance = currentDistance;
+        }
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        isPinching = false;
+      }
+    }, { passive: true });
+  });
+}
+
+function getTouchDistance(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function handlePinchZoom(factor) {
+  if (window.currentMode === '2d') {
+    window.camera2D.zoom = Math.max(0.1, Math.min(5, window.camera2D.zoom * factor));
+  } else if (window.camera3D) {
+    const newZ = window.camera3D.position.z / factor;
+    window.camera3D.position.z = Math.max(2, Math.min(50, newZ));
+  }
+}
+
+// Inicializar mobile UI
+function initMobileUI() {
+  if (window.innerWidth <= 768) {
+    createMobileNavigation();
+    initMobileGestures();
+    initMobileTouchCanvas();
+    
+    // Fechar painéis por padrão no mobile
+    document.querySelector('.panel.left')?.classList.remove('open');
+    document.querySelector('.panel.right')?.classList.remove('open');
+    document.getElementById('bottom-panel').style.display = 'none';
+    
+    logConsole('📱 Interface mobile ativada', 'info');
+  }
+}
+
+// Detectar mudança de orientação
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => {
+    if (window.renderer2D) {
+      const canvas = document.getElementById('gameCanvas');
+      window.renderer2D.canvas.width = canvas.clientWidth;
+      window.renderer2D.canvas.height = canvas.clientHeight;
+    }
+    if (window.renderer3D) {
+      const canvas = document.getElementById('threeCanvas');
+      window.renderer3D.setSize(canvas.clientWidth, canvas.clientHeight);
+      if (window.camera3D) {
+        window.camera3D.aspect = canvas.clientWidth / canvas.clientHeight;
+        window.camera3D.updateProjectionMatrix();
+      }
+    }
+  }, 100);
+});
+
+// Prevenir zoom duplo-toque no iOS
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, { passive: false });
+
+// Substituir a função init() existente
+function init() {
+  logConsole('🚀 KaezarEngine v2.0 iniciado! 2D + 3D + AI Agent ativo.', 'info');
+  logConsole('💡 Clique em ⚡ AI AGENT para gerar código com IA.', 'info');
+  logConsole('💡 Use Puter (grátis/sem key) ou configure uma API Key no ícone 🔑.', 'info');
+  logConsole('💡 Mude para modo 3D e crie cubos, esferas e mais!', 'info');
+
+  // Inicializar mobile UI
+  initMobileUI();
+
+  // Criar entidades de exemplo
+  createEntity2D('Rect', { x: 100, y: 100, width: 80, height: 80, color: '#00e5ff' });
+  createEntity2D('Rect', { x: 250, y: 150, width: 60, height: 100, color: '#7c4dff' });
+  createEntity2D('Circle', { x: 400, y: 200, radius: 50, color: '#ff6b35' });
+  createEntity2D('Text', { x: 150, y: 350, text: 'KaezarEngine v2', fontSize: 24, color: '#00e676' });
+
+  // Renderizar
+  renderHierarchy();
+  renderInspector();
+  renderLoop();
+
+  // Carregar configuração Puter se existir
+  loadPuterConfig();
+}
+
+// Adicionar função para scroll horizontal suave na toolbar
+function initToolbarScroll() {
+  const toolbar = document.getElementById('toolbar');
+  if (!toolbar) return;
+
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  toolbar.addEventListener('mousedown', (e) => {
+    if (window.innerWidth > 768) return;
+    isDown = true;
+    toolbar.style.cursor = 'grabbing';
+    startX = e.pageX - toolbar.offsetLeft;
+    scrollLeft = toolbar.scrollLeft;
+  });
+
+  toolbar.addEventListener('mouseleave', () => {
+    isDown = false;
+    toolbar.style.cursor = 'default';
+  });
+
+  toolbar.addEventListener('mouseup', () => {
+    isDown = false;
+    toolbar.style.cursor = 'default';
+  });
+
+  toolbar.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - toolbar.offsetLeft;
+    const walk = (x - startX) * 2;
+    toolbar.scrollLeft = scrollLeft - walk;
+  });
+
+  // Touch scroll
+  let touchStartX = 0;
+  let touchScrollLeft = 0;
+
+  toolbar.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].pageX - toolbar.offsetLeft;
+    touchScrollLeft = toolbar.scrollLeft;
+  }, { passive: true });
+
+  toolbar.addEventListener('touchmove', (e) => {
+    const x = e.touches[0].pageX - toolbar.offsetLeft;
+    const walk = (x - touchStartX) * 1.5;
+    toolbar.scrollLeft = touchScrollLeft - walk;
+  }, { passive: true });
+}
+
+// Chamar no init
+window.addEventListener('DOMContentLoaded', () => {
+  initToolbarScroll();
+});
+</script>
+
+<script id="kaezar-debug-patch-1776902981640" data-summary="Correção gerada pelo Debug Agent" data-runtime="true">
+// Runtime patch: 2026-04-23T00:09:41.640Z
+if (e.color !== undefined) {
+      html += `
+        <div class="prop-row">
+          <span class="prop-label">Color</span>
+          <input type="color" class="prop-color" value="${e.color}" onchange="updateEntityProp('color',this.value)">
+          <input type="text" class="prop-input" value="${e.color}" onchange="updateEntityProp('color',this.value)" style="flex:1;margin-left:6px;">
+        </div>
+      `;
+    }
+  }
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  // Componente de visibilidade
+  html += `
+    <div class="comp-block">
+      <div class="comp-header">
+        <span class="comp-title">👁️ Visibility</span>
+      </div>
+      <div class="comp-body">
+        <div class="prop-row">
+          <span class="prop-label">Visible</span>
+          <input type="checkbox" class="prop-check" ${e.visible ? 'checked' : ''} onchange="updateEntityProp('visible',this.checked)">
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Botão adicionar componente (mobile-friendly)
+  html += `
+    <button class="add-comp-btn" onclick="alert('Adicionar componente (em breve)')">
+      ➕ Add Component
+    </button>
+  `;
+
+  inspector.innerHTML = html;
+}
+
+// Adicionar vibração tátil para ações importantes (se disponível)
+function hapticFeedback(type = 'light') {
+  if (!navigator.vibrate) return;
+  
+  switch(type) {
+    case 'light':
+      navigator.vibrate(10);
+      break;
+    case 'medium':
+      navigator.vibrate(20);
+      break;
+    case 'heavy':
+      navigator.vibrate([10, 20, 10]);
+      break;
+    case 'success':
+      navigator.vibrate([10, 50, 10]);
+      break;
+    case 'error':
+      navigator.vibrate([20, 100, 20, 100, 20]);
+      break;
+  }
+}
+
+// Adicionar feedback em ações importantes
+function selectEntity(entity) {
+  window.selectedEntity = entity;
+  renderHierarchy();
+  renderInspector();
+  hapticFeedback('light');
+}
+
+function createEntity2D(type, props = {}) {
+  const entity = {
+    id: `entity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    name: `${type} ${window.entities2D.length + 1}`,
+    type,
+    visible: true,
+    is3D: false,
+    ...props
+  };
+
+  window.entities2D.push(entity);
+  logConsole(`Criado [2D]: ${entity.name}`, 'info');
+  renderHierarchy();
+  hapticFeedback('medium');
+  return entity;
+}
+
+function createEntity3D(type, props = {}) {
+  let geometry, material, mesh;
+
+  switch(type) {
+    case 'Cube':
+      geometry = new THREE.BoxGeometry(1, 1, 1);
+      break;
+    case 'Sphere':
+      geometry = new THREE.SphereGeometry(0.5, 32, 32);
+      break;
+    case 'Cylinder':
+      geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
+      break;
+    case 'Plane':
+      geometry = new THREE.PlaneGeometry(2, 2);
+      break;
+    default:
+      geometry = new THREE.BoxGeometry(1, 1, 1);
+  }
+
+  material = new THREE.MeshStandardMaterial({ 
+    color: props.color || 0x00e5ff,
+    metalness: 0.3,
+    roughness: 0.7
+  });
+
+  mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(props.x || 0, props.y || 0, props.z || 0);
+
+  const entity = {
+    id: `entity3d_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    name: `${type} ${window.entities3D.length + 1}`,
+    type,
+    visible: true,
+    is3D: true,
+    mesh,
+    position: mesh.position,
+    rotation: mesh.rotation,
+    scale: mesh.scale,
+    color: props.color || '#00e5ff'
+  };
+
+  window.entities3D.push(entity);
+  window.scene3D.add(mesh);
+  logConsole(`Criado [3D]: ${entity.name}`, 'info');
+  renderHierarchy();
+  hapticFeedback('medium');
+  return entity;
+}
+
+// Adicionar feedback ao AI Agent
+function sendAIMessage() {
+  const input = document.getElementById('ai-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  addAIMessage('user', msg);
+  input.value = '';
+  hapticFeedback('light');
+
+  const sendBtn = document.getElementById('ai-send');
+  sendBtn.disabled = true;
+  sendBtn.textContent = '⏳';
+
+  addAIMessage('ai', '<div class="ai-typing"><span></span><span></span><span></span></div>');
+
+  callAIProvider(msg).then(response => {
+    const messages = document.getElementById('ai-messages');
+    messages.removeChild(messages.lastChild);
+    addAIMessage('ai', response);
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'ENVIAR';
+    hapticFeedback('success');
+  }).catch(err => {
+    const messages = document.getElementById('ai-messages');
+    messages.removeChild(messages.lastChild);
+    addAIMessage('ai', `❌ Erro: ${err.message}`);
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'ENVIAR';
+    hapticFeedback('error');
+  });
+}
+
+// Reduzir qualidade de renderização em mobile para melhor performance
+function optimizeForMobile() {
+  if (window.innerWidth > 768) return;
+
+  // Reduzir resolução do canvas 2D
+  const canvas2D = document.getElementById('gameCanvas');
+  if (canvas2D) {
+    const scale = window.devicePixelRatio || 1;
+    const scaleFactor = scale > 1 ? 0.75 : 1; // Reduzir em 25% em telas retina
+    canvas2D.width = canvas2D.clientWidth * scaleFactor;
+    canvas2D.height = canvas2D.clientHeight * scaleFactor;
+  }
+
+  // Otimizar renderer 3D
+  if (window.renderer3D) {
+    window.renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    window.renderer3D.shadowMap.enabled = false; // Desabilitar sombras
+    window.renderer3D.antialias = false;
+  }
+
+  // Reduzir qualidade de geometrias 3D
+  if (window.scene3D) {
+    window.scene3D.traverse((obj) => {
+      if (obj.isMesh && obj.geometry) {
+        // Simplificar geometrias complexas
+        if (obj.geometry.parameters) {
+          const params = obj.geometry.parameters;
+          if (params.widthSegments) {
+            obj.geometry = new THREE.SphereGeometry(
+              params.radius || 0.5,
+              Math.min(params.widthSegments, 16),
+              Math.min(params.heightSegments, 16)
+            );
+          }
+        }
+      }
+    });
+  }
+
+  logConsole('📱 Otimizações mobile aplicadas', 'info');
+}
+
+// Throttle para eventos de resize
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    if (window.innerWidth <= 768) {
+      optimizeForMobile();
+    }
+    
+    // Reajustar canvas
+    if (window.renderer2D) {
+      const canvas = document.getElementById('gameCanvas');
+      window.renderer2D.canvas.width = canvas.clientWidth;
+      window.renderer2D.canvas.height = canvas.clientHeight;
+    }
+    
+    if (window.renderer3D) {
+      const canvas = document.getElementById('threeCanvas');
+      window.renderer3D.setSize(canvas.clientWidth, canvas.clientHeight);
+      if (window.camera3D) {
+        window.camera3D.aspect = canvas.clientWidth / canvas.clientHeight;
+        window.camera3D.updateProjectionMatrix();
+      }
+    }
+  }, 250);
+});
+</script>
+</body>', patchScript + '\n</body>');
   localStorage.setItem('kaezar_patched_src', patchedSrc);
 }
 
